@@ -16,7 +16,7 @@ function formatCurrency(input) {
     input.value = value;
 }
 
-// Função para converter moeda brasileira em número
+// Função para converter moeda brasileira em númeroo
 function parseCurrency(value) {
     if (!value) return 0;
     return Number(value.replace(/\./g, '').replace(',', '.'));

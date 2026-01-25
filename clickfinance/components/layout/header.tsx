@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+//import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 import Nav from "./nav";
 
@@ -16,8 +16,9 @@ export default function Header() {
 				{/* Nav */}
 				<Nav />
 
-				{/* CTA */}
-				<Button variant="default">Começar grátis</Button>
+				{/* CTA 
+				<Button variant="default">Começar grátis</Button>*/}
+				<div></div>
 			</div>
 		</header>
 	);

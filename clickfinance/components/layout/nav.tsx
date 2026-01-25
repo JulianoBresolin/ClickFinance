@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 const links = [
 	{ href: "/", label: "Home" },
 	{ href: "/calculadora", label: "Calculadora" },
-	{ href: "/sobre", label: "Sobre" },
 ];
 
 export default function Nav() {

@@ -279,3 +279,4 @@ export function gerarAnaliseEvento(
 
 	return analises;
 }
+//

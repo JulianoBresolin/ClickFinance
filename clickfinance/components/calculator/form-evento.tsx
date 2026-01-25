@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Select,
@@ -13,7 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Info, Calculator } from "lucide-react";
+import { Info, Calculator, TrendingUp } from "lucide-react";
 import { type DadosEvento } from "@/lib/calculator-utils";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -27,7 +28,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 	const [taxaPlataforma, setTaxaPlataforma] = useState("");
 	const [fotosFeitas, setFotosFeitas] = useState("");
 	const [fotosVendidas, setFotosVendidas] = useState("");
-	const [precoFoto, setPrecoFoto] = useState("");
+	const [faturamentoBruto, setFaturamentoBruto] = useState("");
 	const [custos, setCustos] = useState("");
 	const [valorCamera, setValorCamera] = useState("");
 	const [vidaTotal, setVidaTotal] = useState("");
@@ -45,7 +46,18 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 		});
 	};
 
-	// Calcular depreciação usando useMemo (forma correta)
+	// Calcular preço médio por foto
+	const precoMedioPorFoto = useMemo(() => {
+		const faturamento = parseCurrency(faturamentoBruto);
+		const vendidas = Number(fotosVendidas) || 0;
+
+		if (faturamento > 0 && vendidas > 0) {
+			return faturamento / vendidas;
+		}
+		return 0;
+	}, [faturamentoBruto, fotosVendidas]);
+
+	// Calcular depreciação usando useMemo
 	const depreciacaoCalculada = useMemo(() => {
 		const valorCam = parseCurrency(valorCamera);
 		const vidaTot = Number(vidaTotal) || 1;
@@ -68,7 +80,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 			taxaPlataforma: tipo === "proprio" ? 10 : Number(taxaPlataforma) || 50,
 			fotosFeitas: Number(fotosFeitas) || 0,
 			fotosVendidas: Number(fotosVendidas) || 0,
-			precoFoto: parseCurrency(precoFoto),
+			precoFoto: precoMedioPorFoto,
 			depreciacao: parseCurrency(depreciacaoCalculada),
 			custos: parseCurrency(custos),
 		};
@@ -76,7 +88,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 		if (
 			dados.fotosFeitas === 0 ||
 			dados.fotosVendidas === 0 ||
-			dados.precoFoto === 0
+			precoMedioPorFoto === 0
 		) {
 			alert("Por favor, preencha os campos obrigatórios!");
 			return;
@@ -89,11 +101,136 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<Alert>
 				<Info className="h-4 w-4" />
-				<AlertDescription>
+				<AlertDescription className="flex align-items-center">
 					Use para analisar eventos <strong>individuais</strong> com cálculo
-					automático de depreciação
+					automático de depreciação e preço médio
 				</AlertDescription>
 			</Alert>
+
+			{/* Dados do Evento */}
+			<div className="space-y-4">
+				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+					🎯 Dados do Evento
+				</h3>
+
+				<div className="space-y-2">
+					<Label htmlFor="nome">Nome do evento</Label>
+					<Input
+						id="nome"
+						placeholder="Ex: YOGA IN NATURA - PARQUE BARIGUI"
+						value={nome}
+						onChange={(e) => setNome(e.target.value)}
+					/>
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="space-y-2">
+						<Label htmlFor="tipo">Tipo de evento</Label>
+						<Select
+							value={tipo}
+							onValueChange={(value: "proprio" | "plataforma") =>
+								setTipo(value)
+							}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="proprio">Evento Próprio (10%)</SelectItem>
+								<SelectItem value="plataforma">
+									Evento da Plataforma (variável)
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+
+					{tipo === "plataforma" && (
+						<div className="space-y-2">
+							<Label htmlFor="taxaPlataforma">Taxa da plataforma (%)</Label>
+							<NumberInput
+								id="taxaPlataforma"
+								placeholder="Ex: 60"
+								value={taxaPlataforma}
+								onValueChange={setTaxaPlataforma}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Entre 40% e 70% para eventos da plataforma
+							</p>
+						</div>
+					)}
+				</div>
+			</div>
+
+			{/* Produção e Vendas */}
+			<div className="space-y-4">
+				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+					📸 Produção e Vendas
+				</h3>
+
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div className="space-y-2">
+						<Label htmlFor="fotosFeitas">Fotos capturadas</Label>
+						<NumberInput
+							id="fotosFeitas"
+							placeholder="Ex: 15.500"
+							value={fotosFeitas}
+							onValueChange={setFotosFeitas}
+						/>
+						<p className="text-sm text-muted-foreground">
+							Total de fotos tiradas
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
+						<NumberInput
+							id="fotosVendidas"
+							placeholder="Ex: 3"
+							value={fotosVendidas}
+							onValueChange={setFotosVendidas}
+						/>
+						<p className="text-sm text-muted-foreground">Quantidade vendida</p>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="faturamentoBruto">Total faturado (R$)</Label>
+						<CurrencyInput
+							id="faturamentoBruto"
+							placeholder="Ex: 30,27"
+							value={faturamentoBruto}
+							onValueChange={setFaturamentoBruto}
+						/>
+						<p className="text-sm text-muted-foreground">
+							Valor bruto antes das taxas
+						</p>
+					</div>
+				</div>
+
+				{/* Card com preço médio calculado */}
+				{precoMedioPorFoto > 0 && (
+					<Card className="bg-green-50 border-green-200">
+						<CardContent className="pt-6">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-2">
+									<TrendingUp className="h-5 w-5 text-green-600" />
+									<div>
+										<p className="text-sm font-medium text-green-900">
+											Preço médio por foto
+										</p>
+										<p className="text-xs text-green-700">
+											R$ {formatMoeda(parseCurrency(faturamentoBruto))} ÷{" "}
+											{Number(fotosVendidas)} fotos
+										</p>
+									</div>
+								</div>
+								<div className="text-2xl font-bold text-green-600">
+									R$ {formatMoeda(precoMedioPorFoto)}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+			</div>
 
 			{/* Equipamento */}
 			<div className="space-y-4">
@@ -106,7 +243,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 						<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
 						<CurrencyInput
 							id="valorCamera"
-							placeholder="Ex: 4.500,00"
+							placeholder="Ex: 25.500,00"
 							value={valorCamera}
 							onValueChange={setValorCamera}
 						/>
@@ -114,12 +251,11 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 
 					<div className="space-y-2">
 						<Label htmlFor="vidaTotal">Vida útil do obturador</Label>
-						<Input
+						<NumberInput
 							id="vidaTotal"
-							type="number"
-							placeholder="Ex: 100000"
+							placeholder="Ex: 350.000"
 							value={vidaTotal}
-							onChange={(e) => setVidaTotal(e.target.value)}
+							onValueChange={setVidaTotal}
 						/>
 						<p className="text-sm text-muted-foreground">
 							Total de cliques esperados
@@ -128,12 +264,11 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 
 					<div className="space-y-2">
 						<Label htmlFor="cliquesAtuais">Cliques atuais</Label>
-						<Input
+						<NumberInput
 							id="cliquesAtuais"
-							type="number"
-							placeholder="Ex: 35600"
+							placeholder="Ex: 98.600"
 							value={cliquesAtuais}
-							onChange={(e) => setCliquesAtuais(e.target.value)}
+							onValueChange={setCliquesAtuais}
 						/>
 						<p className="text-sm text-muted-foreground">
 							Contagem do obturador
@@ -168,105 +303,6 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 						</CardContent>
 					</Card>
 				)}
-			</div>
-
-			{/* Dados do Evento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					🎯 Dados do Evento
-				</h3>
-
-				<div className="space-y-2">
-					<Label htmlFor="nome">Nome do evento</Label>
-					<Input
-						id="nome"
-						placeholder="Ex: MEIA MARATONA DE CURITIBA 2025"
-						value={nome}
-						onChange={(e) => setNome(e.target.value)}
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="tipo">Tipo de evento</Label>
-						<Select
-							value={tipo}
-							onValueChange={(value: "proprio" | "plataforma") =>
-								setTipo(value)
-							}
-						>
-							<SelectTrigger>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="proprio">Evento Próprio (10%)</SelectItem>
-								<SelectItem value="plataforma">
-									Evento da Plataforma (variável)
-								</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-
-					{tipo === "plataforma" && (
-						<div className="space-y-2">
-							<Label htmlFor="taxaPlataforma">Taxa da plataforma (%)</Label>
-							<Input
-								id="taxaPlataforma"
-								type="number"
-								placeholder="Ex: 60"
-								value={taxaPlataforma}
-								onChange={(e) => setTaxaPlataforma(e.target.value)}
-							/>
-							<p className="text-sm text-muted-foreground">
-								Entre 40% e 70% para eventos da plataforma
-							</p>
-						</div>
-					)}
-				</div>
-			</div>
-
-			{/* Produção */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📸 Produção
-				</h3>
-
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="fotosFeitas">Fotos capturadas</Label>
-						<Input
-							id="fotosFeitas"
-							type="number"
-							placeholder="Ex: 2500"
-							value={fotosFeitas}
-							onChange={(e) => setFotosFeitas(e.target.value)}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
-						<Input
-							id="fotosVendidas"
-							type="number"
-							placeholder="Ex: 45"
-							value={fotosVendidas}
-							onChange={(e) => setFotosVendidas(e.target.value)}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="precoFoto">Preço por foto (R$)</Label>
-						<CurrencyInput
-							id="precoFoto"
-							placeholder="Ex: 9,50"
-							value={precoFoto}
-							onValueChange={setPrecoFoto}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Preço bruto antes das taxas
-						</p>
-					</div>
-				</div>
 			</div>
 
 			{/* Custos */}

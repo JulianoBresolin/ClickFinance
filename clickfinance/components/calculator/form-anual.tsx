@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { DadosAnuais } from "@/lib/calculator-utils";
@@ -60,7 +60,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<Alert>
 				<Info className="h-4 w-4" />
-				<AlertDescription>
+				<AlertDescription className="flex align-items-center">
 					Use os valores <strong>líquidos</strong> do seu relatório (já com
 					taxas descontadas pela plataforma)
 				</AlertDescription>
@@ -77,7 +77,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 						<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
 						<CurrencyInput
 							id="valorCamera"
-							placeholder="Ex: 4.500,00"
+							placeholder="Ex: 18.500,00"
 							value={formData.valorCamera}
 							onValueChange={(value) =>
 								setFormData({ ...formData, valorCamera: value })
@@ -87,13 +87,12 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 
 					<div className="space-y-2">
 						<Label htmlFor="vidaTotal">Vida útil do obturador (cliques)</Label>
-						<Input
+						<NumberInput
 							id="vidaTotal"
-							type="number"
-							placeholder="Ex: 100000"
+							placeholder="Ex: 300.000"
 							value={formData.vidaTotal}
-							onChange={(e) =>
-								setFormData({ ...formData, vidaTotal: e.target.value })
+							onValueChange={(value) =>
+								setFormData({ ...formData, vidaTotal: value })
 							}
 						/>
 					</div>
@@ -101,13 +100,12 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 
 				<div className="space-y-2">
 					<Label htmlFor="cliquesAtuais">Cliques atuais da câmera</Label>
-					<Input
+					<NumberInput
 						id="cliquesAtuais"
-						type="number"
-						placeholder="Ex: 35600"
+						placeholder="Ex: 35.600"
 						value={formData.cliquesAtuais}
-						onChange={(e) =>
-							setFormData({ ...formData, cliquesAtuais: e.target.value })
+						onValueChange={(value) =>
+							setFormData({ ...formData, cliquesAtuais: value })
 						}
 					/>
 					<p className="text-sm text-muted-foreground">
@@ -125,39 +123,36 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div className="space-y-2">
 						<Label htmlFor="fotosTotais">Fotos feitas</Label>
-						<Input
+						<NumberInput
 							id="fotosTotais"
-							type="number"
-							placeholder="Ex: 182643"
+							placeholder="Ex: 282.643"
 							value={formData.fotosTotais}
-							onChange={(e) =>
-								setFormData({ ...formData, fotosTotais: e.target.value })
+							onValueChange={(value) =>
+								setFormData({ ...formData, fotosTotais: value })
 							}
 						/>
 					</div>
 
 					<div className="space-y-2">
 						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
-						<Input
+						<NumberInput
 							id="fotosVendidas"
-							type="number"
-							placeholder="Ex: 2278"
+							placeholder="Ex: 5.278"
 							value={formData.fotosVendidas}
-							onChange={(e) =>
-								setFormData({ ...formData, fotosVendidas: e.target.value })
+							onValueChange={(value) =>
+								setFormData({ ...formData, fotosVendidas: value })
 							}
 						/>
 					</div>
 
 					<div className="space-y-2">
 						<Label htmlFor="eventos">Eventos realizados</Label>
-						<Input
+						<NumberInput
 							id="eventos"
-							type="number"
-							placeholder="Ex: 80"
+							placeholder="Ex: 100"
 							value={formData.eventos}
-							onChange={(e) =>
-								setFormData({ ...formData, eventos: e.target.value })
+							onValueChange={(value) =>
+								setFormData({ ...formData, eventos: value })
 							}
 						/>
 					</div>
@@ -175,7 +170,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 						<Label htmlFor="receitaLiquida">Receita líquida total (R$)</Label>
 						<CurrencyInput
 							id="receitaLiquida"
-							placeholder="Ex: 21.552,49"
+							placeholder="Ex: 50.552,49"
 							value={formData.receitaLiquida}
 							onValueChange={(value) =>
 								setFormData({ ...formData, receitaLiquida: value })

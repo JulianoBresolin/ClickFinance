@@ -46,17 +46,17 @@ export default function CalculadoraPage() {
 						</h1>
 						<p className="text-lg opacity-90">
 							Análise completa para fotógrafos de plataforma (Focoradical,
-							Fotto, Balenk)
+							outras )
 						</p>
 					</div>
 
 					{/* Tabs */}
 					<Tabs defaultValue="anual" className="space-y-6">
-						<TabsList className="grid w-full grid-cols-2 bg-white/90 backdrop-blur">
-							<TabsTrigger value="anual" className="text-base">
+						<TabsList className="grid w-full grid-cols-2 bg-white/50 backdrop-blur ">
+							<TabsTrigger value="anual" className="text-base cursor-pointer">
 								📊 Análise Anual
 							</TabsTrigger>
-							<TabsTrigger value="evento" className="text-base">
+							<TabsTrigger value="evento" className="text-base cursor-pointer">
 								🎯 Análise por Evento
 							</TabsTrigger>
 						</TabsList>

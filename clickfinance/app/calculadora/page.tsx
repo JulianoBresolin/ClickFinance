@@ -36,7 +36,7 @@ export default function CalculadoraPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500">
+		<div className="min-h-screen bg-linear-to-br from-[#8d6e63] via-[#ac968e] to-[#f0cdc1] ">
 			<div className="container mx-auto px-4 py-8">
 				<div className="max-w-6xl mx-auto">
 					{/* Header */}

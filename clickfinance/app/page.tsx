@@ -5,7 +5,7 @@ import { Calculator, LineChart, Camera, CheckCircle } from "lucide-react";
 
 export default function Home() {
 	return (
-		<div className="bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 text-white">
+		<div className="bg-linear-to-br from-[#8d6e63] via-[#ac968e] to-[#f0cdc1] text-white">
 			<div className="container mx-auto px-4 py-16 md:py-24">
 				<div className="flex flex-col gap-16 md:gap-24 items-center">
 					{/* HERO */}
@@ -13,7 +13,7 @@ export default function Home() {
 						<h1 className="text-4xl md:text-6xl font-bold tracking-tight">
 							Precifique seu trabalho fotográfico
 							<br />
-							<span className="text-fuchsia-300">com clareza e lucro</span>
+							<span className="text-[#d7ccc8]">com clareza e lucro</span>
 						</h1>
 
 						<p className="max-w-2xl text-lg md:text-xl opacity-90">
@@ -79,7 +79,7 @@ function Feature({
 	return (
 		<Card className="bg-white/90 backdrop-blur-sm shadow-2xl">
 			<CardHeader>
-				<div className="mb-2 text-fuchsia-500">{icon}</div>
+				<div className="mb-2 text-[#8d6e63]">{icon}</div>
 				<CardTitle>{title}</CardTitle>
 			</CardHeader>
 			<CardContent>

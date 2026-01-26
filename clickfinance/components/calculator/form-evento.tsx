@@ -99,25 +99,23 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
-			<Alert>
-				<Info className="h-4 w-4" />
-				<AlertDescription className="flex align-items-center">
-					Use para analisar eventos <strong>individuais</strong> com cálculo
-					automático de depreciação e preço médio
-				</AlertDescription>
-			</Alert>
-
 			{/* Dados do Evento */}
 			<div className="space-y-4">
 				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
 					🎯 Dados do Evento
 				</h3>
-
+				<Alert>
+					<Info className="h-4 w-4" />
+					<AlertDescription className="flex align-items-center">
+						Vá até o card do evento e veja os as porcentagens cobradas pela
+						plataforma.
+					</AlertDescription>
+				</Alert>
 				<div className="space-y-2">
 					<Label htmlFor="nome">Nome do evento</Label>
 					<Input
 						id="nome"
-						placeholder="Ex: YOGA IN NATURA - PARQUE BARIGUI"
+						placeholder="Ex:Maratona de Curitiba"
 						value={nome}
 						onChange={(e) => setNome(e.target.value)}
 					/>

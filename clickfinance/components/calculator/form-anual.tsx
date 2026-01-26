@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NumberInput } from "@/components/ui/number-input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { DadosAnuais } from "@/lib/calculator-utils";
 
@@ -60,9 +60,10 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<Alert>
 				<Info className="h-4 w-4" />
-				<AlertDescription className="flex align-items-center">
-					Use os valores <strong>líquidos</strong> do seu relatório (já com
-					taxas descontadas pela plataforma)
+				<AlertTitle>Uitlize valores brutos para o cálculo</AlertTitle>
+				<AlertDescription>
+					Entre na sua conta da plataforma para pegar os valores brutos e insira
+					no formulário.
 				</AlertDescription>
 			</Alert>
 

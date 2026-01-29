@@ -17,8 +17,10 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 	const [formData, setFormData] = useState({
 		valorCamera: "",
 		vidaTotal: "",
-		cliquesAtuais: "",
+		cliquesAtuais: "", // Total de cliques (eletronico + mecanico)
+		cliquesAtuaisMecanicos: "", // Apenas cliques mecânicos
 		fotosTotais: "",
+		fotosTotaisMecanicas: "", // Apenas fotos com obturador mecânico
 		fotosVendidas: "",
 		eventos: "",
 		receitaLiquida: "",
@@ -36,8 +38,10 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		const dados: DadosAnuais = {
 			valorCamera: parseCurrency(formData.valorCamera),
 			vidaTotal: Number(formData.vidaTotal) || 1,
-			cliquesAtuais: Number(formData.cliquesAtuais) || 0,
+			cliquesAtuais: Number(formData.cliquesAtuais) || 0, // Campo mantido para referência
+			cliquesAtuaisMecanicos: Number(formData.cliquesAtuaisMecanicos) || 0,
 			fotosTotais: Number(formData.fotosTotais) || 0,
+			fotosTotaisMecanicas: Number(formData.fotosTotaisMecanicas) || 0,
 			fotosVendidas: Number(formData.fotosVendidas) || 0,
 			eventos: Number(formData.eventos) || 0,
 			receitaLiquida: parseCurrency(formData.receitaLiquida),
@@ -45,7 +49,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		};
 
 		if (
-			dados.fotosTotais === 0 ||
+			dados.fotosTotaisMecanicas === 0 ||
 			dados.fotosVendidas === 0 ||
 			dados.receitaLiquida === 0
 		) {
@@ -73,7 +77,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 					📷 Equipamento
 				</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div className="space-y-2">
 						<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
 						<CurrencyInput
@@ -97,22 +101,32 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 							}
 						/>
 					</div>
+					<div className="space-y-2">
+						<Label htmlFor="cliquesAtuaisMecanicos">
+							Cliques mecânicos atuais
+						</Label>
+						<NumberInput
+							id="cliquesAtuaisMecanicos"
+							placeholder="Ex: 35.600"
+							value={formData.cliquesAtuaisMecanicos}
+							onValueChange={(value) =>
+								setFormData({ ...formData, cliquesAtuaisMecanicos: value })
+							}
+						/>
+						<p className="text-sm text-muted-foreground">
+							Contagem do obturador mecânico
+						</p>
+					</div>
 				</div>
-
-				<div className="space-y-2">
-					<Label htmlFor="cliquesAtuais">Cliques atuais da câmera</Label>
-					<NumberInput
-						id="cliquesAtuais"
-						placeholder="Ex: 35.600"
-						value={formData.cliquesAtuais}
-						onValueChange={(value) =>
-							setFormData({ ...formData, cliquesAtuais: value })
-						}
-					/>
-					<p className="text-sm text-muted-foreground">
-						Contagem atual no obturador
-					</p>
-				</div>
+				<Alert>
+					<Info className="h-4 w-4" />
+					<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+					<AlertDescription>
+						Para o cálculo de depreciação, considere apenas os cliques do
+						obturador mecânico. O obturador eletrônico não sofre desgaste
+						físico.
+					</AlertDescription>
+				</Alert>
 			</div>
 
 			{/* Produção */}
@@ -121,15 +135,28 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 					📊 Produção no Período
 				</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 					<div className="space-y-2">
-						<Label htmlFor="fotosTotais">Fotos feitas</Label>
+						<Label htmlFor="fotosTotais">Total de fotos feitas</Label>
 						<NumberInput
 							id="fotosTotais"
 							placeholder="Ex: 282.643"
 							value={formData.fotosTotais}
 							onValueChange={(value) =>
 								setFormData({ ...formData, fotosTotais: value })
+							}
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="fotosTotaisMecanicas">
+							Fotos com obturador mecânico
+						</Label>
+						<NumberInput
+							id="fotosTotaisMecanicas"
+							placeholder="Ex: 150.000"
+							value={formData.fotosTotaisMecanicas}
+							onValueChange={(value) =>
+								setFormData({ ...formData, fotosTotaisMecanicas: value })
 							}
 						/>
 					</div>

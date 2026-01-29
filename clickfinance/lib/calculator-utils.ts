@@ -30,7 +30,9 @@ export interface DadosAnuais {
 	valorCamera: number;
 	vidaTotal: number;
 	cliquesAtuais: number;
+	cliquesAtuaisMecanicos: number;
 	fotosTotais: number;
+	fotosTotaisMecanicas: number;
 	fotosVendidas: number;
 	eventos: number;
 	receitaLiquida: number;
@@ -89,9 +91,10 @@ export interface Nivel {
 
 // Cálculos
 export function calcularAnual(dados: DadosAnuais): ResultadoAnual {
+	// A depreciacao é baseada apenas nos cliques mecânicos
 	const custoPorClique = dados.valorCamera / dados.vidaTotal;
-	const depreciacaoTotal = dados.fotosTotais * custoPorClique;
-	const vidaRestante = dados.vidaTotal - dados.cliquesAtuais;
+	const depreciacaoTotal = dados.fotosTotaisMecanicas * custoPorClique;
+	const vidaRestante = dados.vidaTotal - dados.cliquesAtuaisMecanicos;
 	const percentualVidaRestante = (vidaRestante / dados.vidaTotal) * 100;
 
 	const custoOperacional = dados.eventos * dados.custoEvento;

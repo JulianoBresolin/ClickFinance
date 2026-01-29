@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NumberInput } from "@/components/ui/number-input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Select,
 	SelectContent,
@@ -14,7 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Info, Calculator, TrendingUp } from "lucide-react";
+import { Info, Calculator } from "lucide-react";
 import { type DadosEvento } from "@/lib/calculator-utils";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -27,6 +27,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 	const [tipo, setTipo] = useState<"proprio" | "plataforma">("proprio");
 	const [taxaPlataforma, setTaxaPlataforma] = useState("");
 	const [fotosFeitas, setFotosFeitas] = useState("");
+	const [fotosFeitasMecanicas, setFotosFeitasMecanicas] = useState("");
 	const [fotosVendidas, setFotosVendidas] = useState("");
 	const [faturamentoBruto, setFaturamentoBruto] = useState("");
 	const [custos, setCustos] = useState("");
@@ -61,15 +62,15 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 	const depreciacaoCalculada = useMemo(() => {
 		const valorCam = parseCurrency(valorCamera);
 		const vidaTot = Number(vidaTotal) || 1;
-		const fotosFeit = Number(fotosFeitas) || 0;
+		const fotosMecanicas = Number(fotosFeitasMecanicas) || 0;
 
-		if (valorCam > 0 && vidaTot > 0 && fotosFeit > 0) {
+		if (valorCam > 0 && vidaTot > 0 && fotosMecanicas > 0) {
 			const custoPorClique = valorCam / vidaTot;
-			const depreciacao = fotosFeit * custoPorClique;
+			const depreciacao = fotosMecanicas * custoPorClique;
 			return formatMoeda(depreciacao);
 		}
 		return "0,00";
-	}, [valorCamera, vidaTotal, fotosFeitas]);
+	}, [valorCamera, vidaTotal, fotosFeitasMecanicas]);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -165,7 +166,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 					📸 Produção e Vendas
 				</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 					<div className="space-y-2">
 						<Label htmlFor="fotosFeitas">Fotos capturadas</Label>
 						<NumberInput
@@ -180,10 +181,22 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 					</div>
 
 					<div className="space-y-2">
+						<Label htmlFor="fotosFeitasMecanicas">
+							Fotos com obturador mecânico
+						</Label>
+						<NumberInput
+							id="fotosFeitasMecanicas"
+							placeholder="Ex: 8.500"
+							value={fotosFeitasMecanicas}
+							onValueChange={setFotosFeitasMecanicas}
+						/>
+					</div>
+
+					<div className="space-y-2">
 						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
 						<NumberInput
 							id="fotosVendidas"
-							placeholder="Ex: 3"
+							placeholder="Ex: 120"
 							value={fotosVendidas}
 							onValueChange={setFotosVendidas}
 						/>
@@ -194,7 +207,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 						<Label htmlFor="faturamentoBruto">Total faturado (R$)</Label>
 						<CurrencyInput
 							id="faturamentoBruto"
-							placeholder="Ex: 30,27"
+							placeholder="Ex: 1,308.00"
 							value={faturamentoBruto}
 							onValueChange={setFaturamentoBruto}
 						/>
@@ -203,31 +216,6 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 						</p>
 					</div>
 				</div>
-
-				{/* Card com preço médio calculado */}
-				{precoMedioPorFoto > 0 && (
-					<Card className="bg-green-50 border-green-200">
-						<CardContent className="pt-6">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<TrendingUp className="h-5 w-5 text-green-600" />
-									<div>
-										<p className="text-sm font-medium text-green-900">
-											Preço médio por foto
-										</p>
-										<p className="text-xs text-green-700">
-											R$ {formatMoeda(parseCurrency(faturamentoBruto))} ÷{" "}
-											{Number(fotosVendidas)} fotos
-										</p>
-									</div>
-								</div>
-								<div className="text-2xl font-bold text-green-600">
-									R$ {formatMoeda(precoMedioPorFoto)}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				)}
 			</div>
 
 			{/* Equipamento */}
@@ -235,6 +223,15 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
 					📷 Equipamento
 				</h3>
+				<Alert>
+					<Info className="h-4 w-4" />
+					<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+					<AlertDescription>
+						Para o cálculo de depreciação, considere apenas os cliques do
+						obturador mecânico. O obturador eletrônico não sofre desgaste
+						físico.
+					</AlertDescription>
+				</Alert>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div className="space-y-2">
@@ -286,7 +283,8 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 											Depreciação calculada
 										</p>
 										<p className="text-xs text-blue-700">
-											{Number(fotosFeitas).toLocaleString("pt-BR")} fotos × R${" "}
+											{Number(fotosFeitasMecanicas).toLocaleString("pt-BR")}{" "}
+											fotos (mec) × R${" "}
 											{formatMoeda(
 												parseCurrency(valorCamera) / (Number(vidaTotal) || 1),
 											)}{" "}

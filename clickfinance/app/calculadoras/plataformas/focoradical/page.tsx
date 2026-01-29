@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormAnual } from "@/components/calculator/form-anual";
-import { FormEvento } from "@/components/calculator/form-evento";
-import { ResultadoAnual } from "@/components/calculator/resultado-anual";
-import { ResultadoEvento } from "@/components/calculator/resultado-evento";
+import { FormAnual } from "@/app/calculadoras/plataformas/focoradical/components/form-anual";
+import { FormEvento } from "@/app/calculadoras/plataformas/focoradical/components/form-evento";
+import { ResultadoAnual } from "@/app/calculadoras/plataformas/focoradical/components/resultado-anual";
+import { ResultadoEvento } from "@/app/calculadoras/plataformas/focoradical/components/resultado-evento";
 import {
 	calcularAnual,
 	calcularEvento,

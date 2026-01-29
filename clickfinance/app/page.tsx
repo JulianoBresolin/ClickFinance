@@ -23,7 +23,7 @@ export default function Home() {
 
 						<div className="flex flex-col sm:flex-row gap-4 mt-4">
 							<Button size="lg" asChild>
-								<Link href="/calculadora">
+								<Link href="/calculadoras/plataformas/focoradical">
 									<Calculator className="mr-2 h-5 w-5" />
 									Acessar Calculadora
 								</Link>

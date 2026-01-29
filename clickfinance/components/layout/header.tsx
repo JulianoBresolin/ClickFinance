@@ -10,7 +10,7 @@ export default function Header() {
 				{/* Logo */}
 				<Link href="/" className="flex items-center gap-2 font-bold">
 					<Calculator className="h-5 w-5" />
-					<span>ClickFinance</span>
+					<span>ClickPhotoFinance</span>
 				</Link>
 
 				{/* Nav */}
@@ -18,7 +18,6 @@ export default function Header() {
 
 				{/* CTA 
 				<Button variant="default">Começar grátis</Button>*/}
-				<div></div>
 			</div>
 		</header>
 	);

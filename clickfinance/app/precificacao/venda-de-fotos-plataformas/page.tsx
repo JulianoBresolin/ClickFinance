@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FormPrecificacao } from "./components/form-precificacao";
 import { ResultadoPrecificacao } from "./components/resultado-precificacao";
 import {
@@ -13,6 +13,14 @@ export default function PrecificacaoPage() {
 	const [resultado, setResultado] = useState<TipoResultadoPrecificacao | null>(
 		null,
 	);
+
+	const resultadoRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (resultado) {
+			resultadoRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [resultado]);
 
 	const handleCalcular = (dados: DadosPrecificacao) => {
 		const calc = calcularPrecificacao(dados);
@@ -41,7 +49,10 @@ export default function PrecificacaoPage() {
 
 					{/* Resultados */}
 					{resultado && (
-						<div className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6">
+						<div
+							ref={resultadoRef}
+							className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6 scroll-mt-24"
+						>
 							<ResultadoPrecificacao resultado={resultado} />
 						</div>
 					)}

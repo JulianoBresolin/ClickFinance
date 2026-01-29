@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormAnual } from "@/app/calculadoras/plataformas/focoradical/components/form-anual";
 import { FormEvento } from "@/app/calculadoras/plataformas/focoradical/components/form-evento";
@@ -22,6 +22,21 @@ export default function CalculadoraPage() {
 	const [resultadoEvento, setResultadoEvento] =
 		useState<TipoResultadoEvento | null>(null);
 	const [dadosEvento, setDadosEvento] = useState<DadosEvento | null>(null);
+
+	const resultadoAnualRef = useRef<HTMLDivElement>(null);
+	const resultadoEventoRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (resultadoAnual) {
+			resultadoAnualRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [resultadoAnual]);
+
+	useEffect(() => {
+		if (resultadoEvento) {
+			resultadoEventoRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [resultadoEvento]);
 
 	const handleCalcularAnual = (dados: DadosAnuais) => {
 		const resultado = calcularAnual(dados);
@@ -68,7 +83,10 @@ export default function CalculadoraPage() {
 							</div>
 
 							{resultadoAnual && dadosAnual && (
-								<div className="bg-white rounded-lg shadow-2xl p-6">
+								<div
+									ref={resultadoAnualRef}
+									className="bg-white rounded-lg shadow-2xl p-6 scroll-mt-24"
+								>
 									<ResultadoAnual
 										resultado={resultadoAnual}
 										dados={dadosAnual}
@@ -84,7 +102,10 @@ export default function CalculadoraPage() {
 							</div>
 
 							{resultadoEvento && dadosEvento && (
-								<div className="bg-white rounded-lg shadow-2xl p-6">
+								<div
+									ref={resultadoEventoRef}
+									className="bg-white rounded-lg shadow-2xl p-6 scroll-mt-24"
+								>
 									<ResultadoEvento
 										resultado={resultadoEvento}
 										dados={dadosEvento}

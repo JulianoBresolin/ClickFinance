@@ -1,6 +1,6 @@
 import Link from "next/link";
 //import { Button } from "@/components/ui/button";
-import { Calculator } from "lucide-react";
+
 import Nav from "./nav";
 
 export default function Header() {
@@ -9,8 +9,7 @@ export default function Header() {
 			<div className="container mx-auto flex h-16 items-center justify-between px-4">
 				{/* Logo */}
 				<Link href="/" className="flex items-center gap-2 font-bold">
-					<Calculator className="h-5 w-5" />
-					<span>ClickPhotoFinance</span>
+					<img src="/logo.png" alt="ClickFinance Logo" className="h-8" />
 				</Link>
 
 				{/* Nav */}

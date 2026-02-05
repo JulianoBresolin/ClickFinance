@@ -65,6 +65,12 @@ export default function Nav() {
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
+				<Link
+					href="/pesquisa"
+					className="text-sm font-medium text-muted-foreground hover:text-foreground"
+				>
+					Pesquisa
+				</Link>
 			</nav>
 
 			{/* Mobile Nav */}

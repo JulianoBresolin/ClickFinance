@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Info, Calculator } from "lucide-react";
 import { type DadosPrecificacao } from "@/lib/pricing-utils";
 import { Card, CardContent } from "@/components/ui/card";
-
+import { SearchPopup } from "@/components/layout/search-popup";
 interface FormPrecificacaoProps {
 	onCalculate: (dados: DadosPrecificacao) => void;
 }
@@ -26,6 +26,7 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 	const [taxaPlataforma, setTaxaPlataforma] = useState(10);
 	const [margemLucroDesejada, setMargemLucroDesejada] = useState(30);
 	const [vendasEstimadas, setVendasEstimadas] = useState("");
+	const [showPopup, setShowPopup] = useState(false);
 
 	const parseCurrency = (value: string): number => {
 		if (!value) return 0;
@@ -54,227 +55,243 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 		}
 
 		onCalculate(dados);
+
+		// Mostrar popup após 5 segundos
+		setTimeout(() => {
+			setShowPopup(true);
+		}, 5000);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			<Alert>
-				<Info className="h-4 w-4" />
-				<AlertDescription>
-					Calcule o preço ideal para suas fotos considerando todos os custos e
-					sua margem de lucro desejada
-				</AlertDescription>
-			</Alert>
+		<>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				<Alert>
+					<Info className="h-4 w-4" />
+					<AlertDescription>
+						Calcule o preço ideal para suas fotos considerando todos os custos e
+						sua margem de lucro desejada
+					</AlertDescription>
+				</Alert>
 
-			{/* Custos Fixos e Depreciação */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					💰 Custos Fixos e Depreciação
-				</h3>
+				{/* Custos Fixos e Depreciação */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						💰 Custos Fixos e Depreciação
+					</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="custosFixosMensais">
+								Custos fixos mensais (R$)
+							</Label>
+							<CurrencyInput
+								id="custosFixosMensais"
+								placeholder="Ex: 250,00"
+								value={custosFixosMensais}
+								onValueChange={setCustosFixosMensais}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Software, internet, contador, etc.
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="eventosPorMes">Eventos por mês</Label>
+							<NumberInput
+								id="eventosPorMes"
+								placeholder="Ex: 4"
+								value={eventosPorMes}
+								onValueChange={setEventosPorMes}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Para diluir os custos fixos.
+							</p>
+						</div>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="valorEquipamento">
+								Valor do equipamento (R$)
+							</Label>
+							<CurrencyInput
+								id="valorEquipamento"
+								placeholder="Ex: 15.000,00"
+								value={valorEquipamento}
+								onValueChange={setValorEquipamento}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Câmera, lentes, flash, etc.
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="vidaUtilEquipamentoCliques">
+								Vida útil do obturador
+							</Label>
+							<NumberInput
+								id="vidaUtilEquipamentoCliques"
+								placeholder="Ex: 200.000"
+								value={vidaUtilEquipamentoCliques}
+								onValueChange={setVidaUtilEquipamentoCliques}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Em cliques (obturador mecânico).
+							</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Custos Variáveis do Evento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						🚗 Custos Variáveis do Evento
+					</h3>
 					<div className="space-y-2">
-						<Label htmlFor="custosFixosMensais">
-							Custos fixos mensais (R$)
+						<Label htmlFor="custoOperacional">
+							Custo operacional do evento (R$)
 						</Label>
 						<CurrencyInput
-							id="custosFixosMensais"
-							placeholder="Ex: 250,00"
-							value={custosFixosMensais}
-							onValueChange={setCustosFixosMensais}
+							id="custoOperacional"
+							placeholder="Ex: 150,00"
+							value={custoOperacional}
+							onValueChange={setCustoOperacional}
 						/>
 						<p className="text-sm text-muted-foreground">
-							Software, internet, contador, etc.
-						</p>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="eventosPorMes">Eventos por mês</Label>
-						<NumberInput
-							id="eventosPorMes"
-							placeholder="Ex: 4"
-							value={eventosPorMes}
-							onValueChange={setEventosPorMes}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Para diluir os custos fixos.
+							Combustível, alimentação, estacionamento.
 						</p>
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="valorEquipamento">Valor do equipamento (R$)</Label>
-						<CurrencyInput
-							id="valorEquipamento"
-							placeholder="Ex: 15.000,00"
-							value={valorEquipamento}
-							onValueChange={setValorEquipamento}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Câmera, lentes, flash, etc.
-						</p>
+				{/* Estimativas do Evento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📊 Estimativas do Evento
+					</h3>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="fotosEstimadasEvento">
+								Fotos que irá capturar
+							</Label>
+							<NumberInput
+								id="fotosEstimadasEvento"
+								placeholder="Ex: 2.500"
+								value={fotosEstimadasEvento}
+								onValueChange={setFotosEstimadasEvento}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Quantas fotos você espera tirar
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="vendasEstimadas">Vendas estimadas</Label>
+							<NumberInput
+								id="vendasEstimadas"
+								placeholder="Ex: 25"
+								value={vendasEstimadas}
+								onValueChange={setVendasEstimadas}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Quantas fotos você espera vender
+							</p>
+						</div>
 					</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="vidaUtilEquipamentoCliques">
-							Vida útil do obturador
-						</Label>
-						<NumberInput
-							id="vidaUtilEquipamentoCliques"
-							placeholder="Ex: 200.000"
-							value={vidaUtilEquipamentoCliques}
-							onValueChange={setVidaUtilEquipamentoCliques}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Em cliques (obturador mecânico).
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Custos Variáveis do Evento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					🚗 Custos Variáveis do Evento
-				</h3>
-				<div className="space-y-2">
-					<Label htmlFor="custoOperacional">
-						Custo operacional do evento (R$)
-					</Label>
-					<CurrencyInput
-						id="custoOperacional"
-						placeholder="Ex: 150,00"
-						value={custoOperacional}
-						onValueChange={setCustoOperacional}
-					/>
-					<p className="text-sm text-muted-foreground">
-						Combustível, alimentação, estacionamento.
-					</p>
-				</div>
-			</div>
-
-			{/* Estimativas do Evento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📊 Estimativas do Evento
-				</h3>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="fotosEstimadasEvento">Fotos que irá capturar</Label>
-						<NumberInput
-							id="fotosEstimadasEvento"
-							placeholder="Ex: 2.500"
-							value={fotosEstimadasEvento}
-							onValueChange={setFotosEstimadasEvento}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Quantas fotos você espera tirar
-						</p>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="vendasEstimadas">Vendas estimadas</Label>
-						<NumberInput
-							id="vendasEstimadas"
-							placeholder="Ex: 25"
-							value={vendasEstimadas}
-							onValueChange={setVendasEstimadas}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Quantas fotos você espera vender
-						</p>
-					</div>
-				</div>
-
-				{/* Card de Taxa de Conversão */}
-				{parseCurrency(fotosEstimadasEvento) > 0 &&
-					parseCurrency(vendasEstimadas) > 0 && (
-						<Card className="bg-amber-50 border-amber-200">
-							<CardContent className="pt-6">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										<Calculator className="h-5 w-5 text-amber-600" />
-										<div>
-											<p className="text-sm font-medium text-amber-900">
-												Taxa de conversão esperada
-											</p>
-											<p className="text-xs text-amber-700">
-												{parseCurrency(vendasEstimadas)} vendas de{" "}
-												{parseCurrency(fotosEstimadasEvento).toLocaleString(
-													"pt-BR",
-												)}{" "}
-												fotos
-											</p>
+					{/* Card de Taxa de Conversão */}
+					{parseCurrency(fotosEstimadasEvento) > 0 &&
+						parseCurrency(vendasEstimadas) > 0 && (
+							<Card className="bg-amber-50 border-amber-200">
+								<CardContent className="pt-6">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-2">
+											<Calculator className="h-5 w-5 text-amber-600" />
+											<div>
+												<p className="text-sm font-medium text-amber-900">
+													Taxa de conversão esperada
+												</p>
+												<p className="text-xs text-amber-700">
+													{parseCurrency(vendasEstimadas)} vendas de{" "}
+													{parseCurrency(fotosEstimadasEvento).toLocaleString(
+														"pt-BR",
+													)}{" "}
+													fotos
+												</p>
+											</div>
+										</div>
+										<div className="text-2xl font-bold text-amber-600">
+											{(
+												(parseCurrency(vendasEstimadas) /
+													parseCurrency(fotosEstimadasEvento)) *
+												100
+											).toFixed(2)}
+											%
 										</div>
 									</div>
-									<div className="text-2xl font-bold text-amber-600">
-										{(
-											(parseCurrency(vendasEstimadas) /
-												parseCurrency(fotosEstimadasEvento)) *
-											100
-										).toFixed(2)}
-										%
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-			</div>
+								</CardContent>
+							</Card>
+						)}
+				</div>
 
-			{/* Configurações */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					⚙️ Configurações
-				</h3>
+				{/* Configurações */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						⚙️ Configurações
+					</h3>
 
-				<div className="space-y-6">
-					<div className="space-y-3">
-						<div className="flex justify-between items-center">
-							<Label>Taxa da plataforma (%)</Label>
-							<span className="text-2xl font-bold text-primary">
-								{taxaPlataforma}%
-							</span>
+					<div className="space-y-6">
+						<div className="space-y-3">
+							<div className="flex justify-between items-center">
+								<Label>Taxa da plataforma (%)</Label>
+								<span className="text-2xl font-bold text-primary">
+									{taxaPlataforma}%
+								</span>
+							</div>
+							<Slider
+								value={[taxaPlataforma]}
+								onValueChange={(value) => setTaxaPlataforma(value[0])}
+								min={5}
+								max={70}
+								step={5}
+								className="w-full"
+							/>
+							<p className="text-sm text-muted-foreground">
+								Focoradical: 10% próprios | 40-70% plataforma
+							</p>
 						</div>
-						<Slider
-							value={[taxaPlataforma]}
-							onValueChange={(value) => setTaxaPlataforma(value[0])}
-							min={5}
-							max={70}
-							step={5}
-							className="w-full"
-						/>
-						<p className="text-sm text-muted-foreground">
-							Focoradical: 10% próprios | 40-70% plataforma
-						</p>
-					</div>
 
-					<div className="space-y-3">
-						<div className="flex justify-between items-center">
-							<Label>Margem de lucro desejada (%)</Label>
-							<span className="text-2xl font-bold text-green-600">
-								{margemLucroDesejada}%
-							</span>
+						<div className="space-y-3">
+							<div className="flex justify-between items-center">
+								<Label>Margem de lucro desejada (%)</Label>
+								<span className="text-2xl font-bold text-green-600">
+									{margemLucroDesejada}%
+								</span>
+							</div>
+							<Slider
+								value={[margemLucroDesejada]}
+								onValueChange={(value) => setMargemLucroDesejada(value[0])}
+								min={10}
+								max={100}
+								step={5}
+								className="w-full"
+							/>
+							<p className="text-sm text-muted-foreground">
+								Recomendado: 30% a 50% para eventos
+							</p>
 						</div>
-						<Slider
-							value={[margemLucroDesejada]}
-							onValueChange={(value) => setMargemLucroDesejada(value[0])}
-							min={10}
-							max={100}
-							step={5}
-							className="w-full"
-						/>
-						<p className="text-sm text-muted-foreground">
-							Recomendado: 30% a 50% para eventos
-						</p>
 					</div>
 				</div>
-			</div>
 
-			<Button type="submit" className="w-full" size="lg">
-				Calcular Precificação
-			</Button>
-		</form>
+				<Button type="submit" className="w-full" size="lg">
+					Calcular Precificação
+				</Button>
+			</form>
+			<SearchPopup
+				isManual
+				isOpen={showPopup}
+				onClose={() => setShowPopup(false)}
+			/>
+		</>
 	);
 }

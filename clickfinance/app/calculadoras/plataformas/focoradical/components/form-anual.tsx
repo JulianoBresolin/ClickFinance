@@ -8,6 +8,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { DadosAnuais } from "@/lib/calculator-utils";
+import { SearchPopup } from "@/components/layout/search-popup";
 
 interface FormAnualProps {
 	onCalculate: (dados: DadosAnuais) => void;
@@ -26,6 +27,7 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		receitaLiquida: "",
 		custoEvento: "",
 	});
+	const [showPopup, setShowPopup] = useState(false);
 
 	const parseCurrency = (value: string): number => {
 		if (!value) return 0;
@@ -58,179 +60,193 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 		}
 
 		onCalculate(dados);
+
+		// Mostrar popup após 5 segundos
+		setTimeout(() => {
+			setShowPopup(true);
+		}, 5000);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			<Alert>
-				<Info className="h-4 w-4" />
-				<AlertTitle>Uitlize valores brutos para o cálculo</AlertTitle>
-				<AlertDescription>
-					Entre na sua conta da plataforma para pegar os valores brutos e insira
-					no formulário.
-				</AlertDescription>
-			</Alert>
-
-			{/* Equipamento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📷 Equipamento
-				</h3>
-
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
-						<CurrencyInput
-							id="valorCamera"
-							placeholder="Ex: 18.500,00"
-							value={formData.valorCamera}
-							onValueChange={(value) =>
-								setFormData({ ...formData, valorCamera: value })
-							}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="vidaTotal">Vida útil do obturador (cliques)</Label>
-						<NumberInput
-							id="vidaTotal"
-							placeholder="Ex: 300.000"
-							value={formData.vidaTotal}
-							onValueChange={(value) =>
-								setFormData({ ...formData, vidaTotal: value })
-							}
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="cliquesAtuaisMecanicos">
-							Cliques mecânicos atuais
-						</Label>
-						<NumberInput
-							id="cliquesAtuaisMecanicos"
-							placeholder="Ex: 35.600"
-							value={formData.cliquesAtuaisMecanicos}
-							onValueChange={(value) =>
-								setFormData({ ...formData, cliquesAtuaisMecanicos: value })
-							}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Contagem do obturador mecânico
-						</p>
-					</div>
-				</div>
+		<>
+			<form onSubmit={handleSubmit} className="space-y-6">
 				<Alert>
 					<Info className="h-4 w-4" />
-					<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+					<AlertTitle>Uitlize valores brutos para o cálculo</AlertTitle>
 					<AlertDescription>
-						Para o cálculo de depreciação, considere apenas os cliques do
-						obturador mecânico. O obturador eletrônico não sofre desgaste
-						físico.
+						Entre na sua conta da plataforma para pegar os valores brutos e
+						insira no formulário.
 					</AlertDescription>
 				</Alert>
-			</div>
 
-			{/* Produção */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📊 Produção no Período
-				</h3>
+				{/* Equipamento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📷 Equipamento
+					</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="fotosTotais">Total de fotos feitas</Label>
-						<NumberInput
-							id="fotosTotais"
-							placeholder="Ex: 282.643"
-							value={formData.fotosTotais}
-							onValueChange={(value) =>
-								setFormData({ ...formData, fotosTotais: value })
-							}
-						/>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
+							<CurrencyInput
+								id="valorCamera"
+								placeholder="Ex: 18.500,00"
+								value={formData.valorCamera}
+								onValueChange={(value) =>
+									setFormData({ ...formData, valorCamera: value })
+								}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="vidaTotal">
+								Vida útil do obturador (cliques)
+							</Label>
+							<NumberInput
+								id="vidaTotal"
+								placeholder="Ex: 300.000"
+								value={formData.vidaTotal}
+								onValueChange={(value) =>
+									setFormData({ ...formData, vidaTotal: value })
+								}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="cliquesAtuaisMecanicos">
+								Cliques mecânicos atuais
+							</Label>
+							<NumberInput
+								id="cliquesAtuaisMecanicos"
+								placeholder="Ex: 35.600"
+								value={formData.cliquesAtuaisMecanicos}
+								onValueChange={(value) =>
+									setFormData({ ...formData, cliquesAtuaisMecanicos: value })
+								}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Contagem do obturador mecânico
+							</p>
+						</div>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="fotosTotaisMecanicas">
-							Fotos com obturador mecânico
-						</Label>
-						<NumberInput
-							id="fotosTotaisMecanicas"
-							placeholder="Ex: 150.000"
-							value={formData.fotosTotaisMecanicas}
-							onValueChange={(value) =>
-								setFormData({ ...formData, fotosTotaisMecanicas: value })
-							}
-						/>
-					</div>
+					<Alert>
+						<Info className="h-4 w-4" />
+						<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+						<AlertDescription>
+							Para o cálculo de depreciação, considere apenas os cliques do
+							obturador mecânico. O obturador eletrônico não sofre desgaste
+							físico.
+						</AlertDescription>
+					</Alert>
+				</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
-						<NumberInput
-							id="fotosVendidas"
-							placeholder="Ex: 5.278"
-							value={formData.fotosVendidas}
-							onValueChange={(value) =>
-								setFormData({ ...formData, fotosVendidas: value })
-							}
-						/>
-					</div>
+				{/* Produção */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📊 Produção no Período
+					</h3>
 
-					<div className="space-y-2">
-						<Label htmlFor="eventos">Eventos realizados</Label>
-						<NumberInput
-							id="eventos"
-							placeholder="Ex: 100"
-							value={formData.eventos}
-							onValueChange={(value) =>
-								setFormData({ ...formData, eventos: value })
-							}
-						/>
+					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="fotosTotais">Total de fotos feitas</Label>
+							<NumberInput
+								id="fotosTotais"
+								placeholder="Ex: 282.643"
+								value={formData.fotosTotais}
+								onValueChange={(value) =>
+									setFormData({ ...formData, fotosTotais: value })
+								}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="fotosTotaisMecanicas">
+								Fotos com obturador mecânico
+							</Label>
+							<NumberInput
+								id="fotosTotaisMecanicas"
+								placeholder="Ex: 150.000"
+								value={formData.fotosTotaisMecanicas}
+								onValueChange={(value) =>
+									setFormData({ ...formData, fotosTotaisMecanicas: value })
+								}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
+							<NumberInput
+								id="fotosVendidas"
+								placeholder="Ex: 5.278"
+								value={formData.fotosVendidas}
+								onValueChange={(value) =>
+									setFormData({ ...formData, fotosVendidas: value })
+								}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="eventos">Eventos realizados</Label>
+							<NumberInput
+								id="eventos"
+								placeholder="Ex: 100"
+								value={formData.eventos}
+								onValueChange={(value) =>
+									setFormData({ ...formData, eventos: value })
+								}
+							/>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			{/* Financeiro */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					💰 Financeiro
-				</h3>
+				{/* Financeiro */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						💰 Financeiro
+					</h3>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="receitaLiquida">Receita líquida total (R$)</Label>
-						<CurrencyInput
-							id="receitaLiquida"
-							placeholder="Ex: 50.552,49"
-							value={formData.receitaLiquida}
-							onValueChange={(value) =>
-								setFormData({ ...formData, receitaLiquida: value })
-							}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Valor após desconto das taxas da plataforma
-						</p>
-					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="receitaLiquida">Receita líquida total (R$)</Label>
+							<CurrencyInput
+								id="receitaLiquida"
+								placeholder="Ex: 50.552,49"
+								value={formData.receitaLiquida}
+								onValueChange={(value) =>
+									setFormData({ ...formData, receitaLiquida: value })
+								}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Valor após desconto das taxas da plataforma
+							</p>
+						</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="custoEvento">
-							Custo operacional por evento (R$)
-						</Label>
-						<CurrencyInput
-							id="custoEvento"
-							placeholder="Ex: 150,00"
-							value={formData.custoEvento}
-							onValueChange={(value) =>
-								setFormData({ ...formData, custoEvento: value })
-							}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Combustível, alimentação, estacionamento
-						</p>
+						<div className="space-y-2">
+							<Label htmlFor="custoEvento">
+								Custo operacional por evento (R$)
+							</Label>
+							<CurrencyInput
+								id="custoEvento"
+								placeholder="Ex: 150,00"
+								value={formData.custoEvento}
+								onValueChange={(value) =>
+									setFormData({ ...formData, custoEvento: value })
+								}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Combustível, alimentação, estacionamento
+							</p>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<Button type="submit" className="w-full" size="lg">
-				Calcular Análise Anual
-			</Button>
-		</form>
+				<Button type="submit" className="w-full" size="lg">
+					Calcular Análise Anual
+				</Button>
+			</form>
+			<SearchPopup
+				isManual
+				isOpen={showPopup}
+				onClose={() => setShowPopup(false)}
+			/>
+		</>
 	);
 }

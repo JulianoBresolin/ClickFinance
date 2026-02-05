@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Header from "@/components/layout/header";
+import { SearchPopup } from "@/components/layout/search-popup";
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
 		siteName: "Click Photo Finance",
 		images: [
 			{
-				url: "https://clickphotofinance.vercel.app/og-image.jpg", // Certifique-se de ter uma imagem na pasta public
+				url: "https://clickphotofinance.vercel.app/og_image.jpg", // Certifique-se de ter uma imagem na pasta public
 				width: 1200,
 				height: 630,
 				alt: "Preview do Click Photo Finance",
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
 		title: "Click Photo Finance",
 		description:
 			"Gestão financeira simplificada para profissionais da fotografia.",
-		images: ["https://clickphotofinance.vercel.app/og-image.jpg"],
+		images: ["https://clickphotofinance.vercel.app/og_image.jpg"],
 	},
 };
 
@@ -71,6 +72,7 @@ export default function RootLayout({
 			>
 				<Header />
 				{children}
+				<SearchPopup />
 				<Toaster richColors position="top-right" />
 			</body>
 		</html>

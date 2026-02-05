@@ -17,6 +17,7 @@ import {
 import { Info, Calculator } from "lucide-react";
 import { type DadosEvento } from "@/lib/calculator-utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { SearchPopup } from "@/components/layout/search-popup";
 
 interface FormEventoProps {
 	onCalculate: (dados: DadosEvento) => void;
@@ -34,6 +35,7 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 	const [valorCamera, setValorCamera] = useState("");
 	const [vidaTotal, setVidaTotal] = useState("");
 	const [cliquesAtuais, setCliquesAtuais] = useState("");
+	const [showPopup, setShowPopup] = useState(false);
 
 	const parseCurrency = (value: string): number => {
 		if (!value) return 0;
@@ -96,234 +98,248 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 		}
 
 		onCalculate(dados);
+
+		// Mostrar popup após 5 segundos
+		setTimeout(() => {
+			setShowPopup(true);
+		}, 5000);
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
-			{/* Dados do Evento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					🎯 Dados do Evento
-				</h3>
-				<Alert>
-					<Info className="h-4 w-4" />
-					<AlertDescription className="flex align-items-center">
-						Vá até o card do evento e veja os as porcentagens cobradas pela
-						plataforma.
-					</AlertDescription>
-				</Alert>
-				<div className="space-y-2">
-					<Label htmlFor="nome">Nome do evento</Label>
-					<Input
-						id="nome"
-						placeholder="Ex:Maratona de Curitiba"
-						value={nome}
-						onChange={(e) => setNome(e.target.value)}
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				{/* Dados do Evento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						🎯 Dados do Evento
+					</h3>
+					<Alert>
+						<Info className="h-4 w-4" />
+						<AlertDescription className="flex align-items-center">
+							Vá até o card do evento e veja os as porcentagens cobradas pela
+							plataforma.
+						</AlertDescription>
+					</Alert>
 					<div className="space-y-2">
-						<Label htmlFor="tipo">Tipo de evento</Label>
-						<Select
-							value={tipo}
-							onValueChange={(value: "proprio" | "plataforma") =>
-								setTipo(value)
-							}
-						>
-							<SelectTrigger>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="proprio">Evento Próprio (10%)</SelectItem>
-								<SelectItem value="plataforma">
-									Evento da Plataforma (variável)
-								</SelectItem>
-							</SelectContent>
-						</Select>
+						<Label htmlFor="nome">Nome do evento</Label>
+						<Input
+							id="nome"
+							placeholder="Ex:Maratona de Curitiba"
+							value={nome}
+							onChange={(e) => setNome(e.target.value)}
+						/>
 					</div>
 
-					{tipo === "plataforma" && (
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="taxaPlataforma">Taxa da plataforma (%)</Label>
+							<Label htmlFor="tipo">Tipo de evento</Label>
+							<Select
+								value={tipo}
+								onValueChange={(value: "proprio" | "plataforma") =>
+									setTipo(value)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="proprio">Evento Próprio (10%)</SelectItem>
+									<SelectItem value="plataforma">
+										Evento da Plataforma (variável)
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						{tipo === "plataforma" && (
+							<div className="space-y-2">
+								<Label htmlFor="taxaPlataforma">Taxa da plataforma (%)</Label>
+								<NumberInput
+									id="taxaPlataforma"
+									placeholder="Ex: 60"
+									value={taxaPlataforma}
+									onValueChange={setTaxaPlataforma}
+								/>
+								<p className="text-sm text-muted-foreground">
+									Entre 40% e 70% para eventos da plataforma
+								</p>
+							</div>
+						)}
+					</div>
+				</div>
+
+				{/* Produção e Vendas */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📸 Produção e Vendas
+					</h3>
+
+					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="fotosFeitas">Fotos capturadas</Label>
 							<NumberInput
-								id="taxaPlataforma"
-								placeholder="Ex: 60"
-								value={taxaPlataforma}
-								onValueChange={setTaxaPlataforma}
+								id="fotosFeitas"
+								placeholder="Ex: 15.500"
+								value={fotosFeitas}
+								onValueChange={setFotosFeitas}
 							/>
 							<p className="text-sm text-muted-foreground">
-								Entre 40% e 70% para eventos da plataforma
+								Total de fotos tiradas
 							</p>
 						</div>
-					)}
-				</div>
-			</div>
 
-			{/* Produção e Vendas */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📸 Produção e Vendas
-				</h3>
+						<div className="space-y-2">
+							<Label htmlFor="fotosFeitasMecanicas">
+								Fotos com obturador mecânico
+							</Label>
+							<NumberInput
+								id="fotosFeitasMecanicas"
+								placeholder="Ex: 8.500"
+								value={fotosFeitasMecanicas}
+								onValueChange={setFotosFeitasMecanicas}
+							/>
+						</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="fotosFeitas">Fotos capturadas</Label>
-						<NumberInput
-							id="fotosFeitas"
-							placeholder="Ex: 15.500"
-							value={fotosFeitas}
-							onValueChange={setFotosFeitas}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Total de fotos tiradas
-						</p>
-					</div>
+						<div className="space-y-2">
+							<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
+							<NumberInput
+								id="fotosVendidas"
+								placeholder="Ex: 120"
+								value={fotosVendidas}
+								onValueChange={setFotosVendidas}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Quantidade vendida
+							</p>
+						</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="fotosFeitasMecanicas">
-							Fotos com obturador mecânico
-						</Label>
-						<NumberInput
-							id="fotosFeitasMecanicas"
-							placeholder="Ex: 8.500"
-							value={fotosFeitasMecanicas}
-							onValueChange={setFotosFeitasMecanicas}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="fotosVendidas">Fotos vendidas</Label>
-						<NumberInput
-							id="fotosVendidas"
-							placeholder="Ex: 120"
-							value={fotosVendidas}
-							onValueChange={setFotosVendidas}
-						/>
-						<p className="text-sm text-muted-foreground">Quantidade vendida</p>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="faturamentoBruto">Total faturado (R$)</Label>
-						<CurrencyInput
-							id="faturamentoBruto"
-							placeholder="Ex: 1,308.00"
-							value={faturamentoBruto}
-							onValueChange={setFaturamentoBruto}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Valor bruto antes das taxas
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Equipamento */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					📷 Equipamento
-				</h3>
-				<Alert>
-					<Info className="h-4 w-4" />
-					<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
-					<AlertDescription>
-						Para o cálculo de depreciação, considere apenas os cliques do
-						obturador mecânico. O obturador eletrônico não sofre desgaste
-						físico.
-					</AlertDescription>
-				</Alert>
-
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
-						<CurrencyInput
-							id="valorCamera"
-							placeholder="Ex: 25.500,00"
-							value={valorCamera}
-							onValueChange={setValorCamera}
-						/>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="vidaTotal">Vida útil do obturador</Label>
-						<NumberInput
-							id="vidaTotal"
-							placeholder="Ex: 350.000"
-							value={vidaTotal}
-							onValueChange={setVidaTotal}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Total de cliques esperados
-						</p>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="cliquesAtuais">Cliques atuais</Label>
-						<NumberInput
-							id="cliquesAtuais"
-							placeholder="Ex: 98.600"
-							value={cliquesAtuais}
-							onValueChange={setCliquesAtuais}
-						/>
-						<p className="text-sm text-muted-foreground">
-							Contagem do obturador
-						</p>
+						<div className="space-y-2">
+							<Label htmlFor="faturamentoBruto">Total faturado (R$)</Label>
+							<CurrencyInput
+								id="faturamentoBruto"
+								placeholder="Ex: 1,308.00"
+								value={faturamentoBruto}
+								onValueChange={setFaturamentoBruto}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Valor bruto antes das taxas
+							</p>
+						</div>
 					</div>
 				</div>
 
-				{/* Card com depreciação calculada */}
-				{parseCurrency(depreciacaoCalculada) > 0 && (
-					<Card className="bg-blue-50 border-blue-200">
-						<CardContent className="pt-6">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Calculator className="h-5 w-5 text-blue-600" />
-									<div>
-										<p className="text-sm font-medium text-blue-900">
-											Depreciação calculada
-										</p>
-										<p className="text-xs text-blue-700">
-											{Number(fotosFeitasMecanicas).toLocaleString("pt-BR")}{" "}
-											fotos (mec) × R${" "}
-											{formatMoeda(
-												parseCurrency(valorCamera) / (Number(vidaTotal) || 1),
-											)}{" "}
-											por clique
-										</p>
+				{/* Equipamento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📷 Equipamento
+					</h3>
+					<Alert>
+						<Info className="h-4 w-4" />
+						<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+						<AlertDescription>
+							Para o cálculo de depreciação, considere apenas os cliques do
+							obturador mecânico. O obturador eletrônico não sofre desgaste
+							físico.
+						</AlertDescription>
+					</Alert>
+
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
+							<CurrencyInput
+								id="valorCamera"
+								placeholder="Ex: 25.500,00"
+								value={valorCamera}
+								onValueChange={setValorCamera}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="vidaTotal">Vida útil do obturador</Label>
+							<NumberInput
+								id="vidaTotal"
+								placeholder="Ex: 350.000"
+								value={vidaTotal}
+								onValueChange={setVidaTotal}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Total de cliques esperados
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="cliquesAtuais">Cliques atuais</Label>
+							<NumberInput
+								id="cliquesAtuais"
+								placeholder="Ex: 98.600"
+								value={cliquesAtuais}
+								onValueChange={setCliquesAtuais}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Contagem do obturador
+							</p>
+						</div>
+					</div>
+
+					{/* Card com depreciação calculada */}
+					{parseCurrency(depreciacaoCalculada) > 0 && (
+						<Card className="bg-blue-50 border-blue-200">
+							<CardContent className="pt-6">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<Calculator className="h-5 w-5 text-blue-600" />
+										<div>
+											<p className="text-sm font-medium text-blue-900">
+												Depreciação calculada
+											</p>
+											<p className="text-xs text-blue-700">
+												{Number(fotosFeitasMecanicas).toLocaleString("pt-BR")}{" "}
+												fotos (mec) × R${" "}
+												{formatMoeda(
+													parseCurrency(valorCamera) / (Number(vidaTotal) || 1),
+												)}{" "}
+												por clique
+											</p>
+										</div>
+									</div>
+									<div className="text-2xl font-bold text-blue-600">
+										R$ {depreciacaoCalculada}
 									</div>
 								</div>
-								<div className="text-2xl font-bold text-blue-600">
-									R$ {depreciacaoCalculada}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				)}
-			</div>
-
-			{/* Custos */}
-			<div className="space-y-4">
-				<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-					💸 Custos Operacionais
-				</h3>
-
-				<div className="space-y-2">
-					<Label htmlFor="custos">Custos operacionais (R$)</Label>
-					<CurrencyInput
-						id="custos"
-						placeholder="Ex: 150,00"
-						value={custos}
-						onValueChange={setCustos}
-					/>
-					<p className="text-sm text-muted-foreground">
-						Combustível, alimentação, estacionamento, etc.
-					</p>
+							</CardContent>
+						</Card>
+					)}
 				</div>
-			</div>
 
-			<Button type="submit" className="w-full" size="lg">
-				Calcular Análise do Evento
-			</Button>
-		</form>
+				{/* Custos */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						💸 Custos Operacionais
+					</h3>
+
+					<div className="space-y-2">
+						<Label htmlFor="custos">Custos operacionais (R$)</Label>
+						<CurrencyInput
+							id="custos"
+							placeholder="Ex: 150,00"
+							value={custos}
+							onValueChange={setCustos}
+						/>
+						<p className="text-sm text-muted-foreground">
+							Combustível, alimentação, estacionamento, etc.
+						</p>
+					</div>
+				</div>
+
+				<Button type="submit" className="w-full" size="lg">
+					Calcular Análise do Evento
+				</Button>
+			</form>
+			<SearchPopup
+				isManual
+				isOpen={showPopup}
+				onClose={() => setShowPopup(false)}
+			/>
+		</>
 	);
 }

@@ -3,228 +3,223 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-	type ResultadoEvento as TipoResultadoEventoV2,
-	type DadosEvento as DadosEventoV2,
+	type ResultadoEvento as TipoResultadoEvento,
+	type DadosEvento,
 	formatMoeda,
-	formatNumero,
 	formatPorcentagem,
+	formatNumero,
 	gerarAnaliseEvento,
 } from "@/lib/calculator-utils-evento";
+import { Camera, Aperture, Box } from "lucide-react";
 
 interface ResultadoEventoProps {
-	resultado: TipoResultadoEventoV2;
-	dados: DadosEventoV2;
+	resultado: TipoResultadoEvento;
+	dados: DadosEvento;
 }
 
 export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
-	const { lucroLiquido } = resultado;
-
-	const statusEvento =
-		lucroLiquido > 0 ? "✅ Evento lucrativo!" : "⚠️ Evento com prejuízo!";
-	const alertVariant: "default" | "destructive" =
-		lucroLiquido > 0 ? "default" : "destructive";
+	const { lucroLiquido, roi } = resultado;
+	const isLucro = lucroLiquido >= 0;
 
 	const analises = gerarAnaliseEvento(
 		resultado.taxaConversao,
 		resultado.margemPorFoto,
 		resultado.roi,
-		dados.taxaPlataforma,
+		dados.porcentagemComissao,
 	);
 
 	return (
 		<div className="space-y-6 animate-in fade-in-50 duration-500">
-			<Card>
-				<CardHeader>
-					<CardTitle>{dados.nome}</CardTitle>
-					<p className="text-sm text-muted-foreground">
-						Tipo:{" "}
-						{dados.tipo === "proprio"
-							? "Evento Próprio"
-							: "Evento da Plataforma"}{" "}
-						| Taxa: {formatPorcentagem(dados.taxaPlataforma, 0)}%
-					</p>
-				</CardHeader>
-			</Card>
-
-			<Alert variant={alertVariant}>
-				<AlertDescription className="font-semibold">
-					{statusEvento}
-				</AlertDescription>
-			</Alert>
-
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-sm text-muted-foreground uppercase">
-						Resultado do Evento
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div
-						className={`text-3xl font-bold ${lucroLiquido >= 0 ? "text-green-600" : "text-red-600"}`}
-					>
-						{lucroLiquido >= 0 ? "+" : ""}R$ {formatMoeda(lucroLiquido)}
-					</div>
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>💰 Breakdown Financeiro</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			{/* Cabeçalho */}
+			<Card className="bg-primary/5 border-primary/20">
+				<CardHeader className="pb-2">
+					<div className="flex justify-between items-start">
 						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Faturamento Bruto
-							</div>
-							<div className="text-xl font-semibold">
-								R$ {formatMoeda(resultado.faturamentoBruto)}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{formatNumero(dados.fotosVendidas)} fotos × R${" "}
-								{formatMoeda(dados.precoFoto)}
+							<CardTitle>{dados.nome}</CardTitle>
+							<p className="text-sm text-muted-foreground mt-1">
+								{dados.tipo === "proprio" ? "Evento Próprio" : "Plataforma"} •
+								Sua Comissão:{" "}
+								<span className="font-semibold text-primary">
+									{dados.porcentagemComissao}%
+								</span>
 							</p>
 						</div>
+						<div className="text-right">
+							<p className="text-sm text-muted-foreground">Vendas</p>
+							<p className="text-xl font-bold">
+								{formatNumero(dados.fotosVendidas)} fotos
+							</p>
+						</div>
+					</div>
+				</CardHeader>
+			</Card>
 
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Taxa Plataforma ({formatPorcentagem(dados.taxaPlataforma, 0)}%)
-							</div>
-							<div className="text-xl font-semibold text-red-600">
-								-R$ {formatMoeda(resultado.taxaValor)}
-							</div>
+			{/* Resultado Principal */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<Card
+					className={
+						isLucro
+							? "bg-green-50 border-green-200"
+							: "bg-red-50 border-red-200"
+					}
+				>
+					<CardContent className="pt-6 text-center">
+						<p className="text-sm font-medium uppercase tracking-wide opacity-70">
+							Lucro Real (No Bolso)
+						</p>
+						<div
+							className={`text-3xl font-bold mt-2 ${isLucro ? "text-green-700" : "text-red-700"}`}
+						>
+							{isLucro ? "+" : ""}R$ {formatMoeda(lucroLiquido)}
+						</div>
+						<p className="text-xs mt-2 opacity-80">Após custos e depreciação</p>
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardContent className="pt-6 text-center">
+						<p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+							ROI do Evento
+						</p>
+						<div
+							className={`text-3xl font-bold mt-2 ${roi >= 0 ? "text-blue-600" : "text-red-600"}`}
+						>
+							{formatPorcentagem(roi, 1)}%
+						</div>
+						<p className="text-xs mt-2 text-muted-foreground">
+							Retorno sobre investimento
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Detalhamento Financeiro */}
+			<Card>
+				<CardHeader>
+					<CardTitle>💰 Fluxo de Caixa</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="space-y-3">
+						<div className="flex justify-between items-center text-sm text-muted-foreground">
+							<span>Faturamento Bruto (Estimado)</span>
+							<span>R$ {formatMoeda(resultado.faturamentoBruto)}</span>
 						</div>
 
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Receita Líquida
-							</div>
-							<div className="text-xl font-semibold text-green-600">
+						<div className="flex justify-between items-center text-sm text-red-400">
+							<span>
+								Taxas da Plataforma (
+								{(100 - dados.porcentagemComissao).toFixed(0)}%)
+							</span>
+							<span>- R$ {formatMoeda(resultado.taxaPlataformaValor)}</span>
+						</div>
+
+						<div className="flex justify-between items-center py-2 border-t border-b bg-secondary/10 px-2 rounded font-semibold">
+							<span>Receita Líquida (Dashboard)</span>
+							<span className="text-primary">
 								R$ {formatMoeda(resultado.receitaLiquida)}
-							</div>
+							</span>
 						</div>
 
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Custo Total
-							</div>
-							<div className="text-xl font-semibold text-red-600">
-								-R$ {formatMoeda(resultado.custoTotal)}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{dados.usarDepreciacaoPorTempo
-									? "Depreciação (Tempo) + Operacional"
-									: "Depreciação (Cliques) + Operacional"}
-							</p>
+						<div className="flex justify-between items-center text-sm">
+							<span>Custos Operacionais</span>
+							<span className="text-red-600">
+								- R$ {formatMoeda(dados.custosOperacionais)}
+							</span>
+						</div>
+
+						<div className="flex justify-between items-center text-sm">
+							<span>Depreciação Equipamento</span>
+							<span className="text-red-600">
+								- R$ {formatMoeda(resultado.depreciacaoTotal)}
+							</span>
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 
+			{/* Depreciação (Igual ao Anual para consistência) */}
 			<Card>
 				<CardHeader>
-					<CardTitle>📊 Métricas do Evento</CardTitle>
+					<CardTitle>📷 Custo do Equipamento (Depreciação)</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Taxa de Conversão
+					<div className="grid grid-cols-3 gap-2 mb-4">
+						<div className="bg-blue-50 p-3 rounded border border-blue-100 text-center">
+							<Camera className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+							<div className="text-xs text-blue-900">Câmeras</div>
+							<div className="font-bold text-blue-700 text-sm">
+								R$ {formatMoeda(resultado.depreciacaoDetalhada.cameras)}
 							</div>
-							<div className="text-xl font-semibold">
-								{formatPorcentagem(resultado.taxaConversao)}%
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{formatNumero(dados.fotosVendidas)} de{" "}
-								{formatNumero(dados.fotosFeitas)} fotos
-							</p>
 						</div>
-
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Receita/Foto Vendida
+						<div className="bg-green-50 p-3 rounded border border-green-100 text-center">
+							<Aperture className="h-4 w-4 text-green-600 mx-auto mb-1" />
+							<div className="text-xs text-green-900">Lentes</div>
+							<div className="font-bold text-green-700 text-sm">
+								R$ {formatMoeda(resultado.depreciacaoDetalhada.lentes)}
 							</div>
-							<div className="text-xl font-semibold">
+						</div>
+						<div className="bg-gray-50 p-3 rounded border border-gray-100 text-center">
+							<Box className="h-4 w-4 text-gray-600 mx-auto mb-1" />
+							<div className="text-xs text-gray-900">Outros</div>
+							<div className="font-bold text-gray-700 text-sm">
+								R$ {formatMoeda(resultado.depreciacaoDetalhada.outros)}
+							</div>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* KPIs */}
+			<Card>
+				<CardHeader>
+					<CardTitle>📊 Métricas Unitárias</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div>
+							<div className="text-xs text-muted-foreground">
+								Preço Médio Venda
+							</div>
+							<div className="font-semibold">
+								R$ {formatMoeda(resultado.precoVendaMedio)}
+							</div>
+						</div>
+						<div>
+							<div className="text-xs text-muted-foreground">
+								Sua Parte / Foto
+							</div>
+							<div className="font-semibold text-green-600">
 								R$ {formatMoeda(resultado.receitaPorFoto)}
 							</div>
-							<p className="text-xs text-muted-foreground">Líquido após taxa</p>
 						</div>
-
 						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Custo Real/Foto
-							</div>
-							<div className="text-xl font-semibold">
+							<div className="text-xs text-muted-foreground">Custo / Foto</div>
+							<div className="font-semibold text-red-600">
 								R$ {formatMoeda(resultado.custoRealPorFoto)}
 							</div>
 						</div>
-
 						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Margem/Foto
-							</div>
+							<div className="text-xs text-muted-foreground">Margem Real</div>
 							<div
-								className={`text-xl font-semibold ${resultado.margemPorFoto >= 0 ? "text-green-600" : "text-red-600"}`}
+								className={`font-semibold ${resultado.margemPorFoto > 0 ? "text-green-600" : "text-red-600"}`}
 							>
 								R$ {formatMoeda(resultado.margemPorFoto)}
 							</div>
 						</div>
-
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">ROI</div>
-							<div
-								className={`text-xl font-semibold ${resultado.roi >= 0 ? "text-green-600" : "text-red-600"}`}
-							>
-								{formatPorcentagem(resultado.roi, 1)}%
-							</div>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>🔧 Custos Detalhados</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Depreciação Equipamento
-							</div>
-							<div className="text-xl font-semibold">
-								R$ {formatMoeda(resultado.depreciacaoTotal)}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{dados.usarDepreciacaoPorTempo
-									? `${dados.diasEvento || 1} dia(s) de uso`
-									: "Baseado em cliques do obturador"}
-							</p>
-						</div>
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Custos Operacionais
-							</div>
-							<div className="text-xl font-semibold">
-								R$ {formatMoeda(dados.custos)}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Logística, alimentação, etc.
-							</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-
+			{/* Recomendações */}
 			{analises.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>💡 Análise do Evento</CardTitle>
+						<CardTitle>💡 Análise</CardTitle>
 					</CardHeader>
-					<CardContent className="space-y-3">
-						{analises.map((analise, index) => (
-							<Alert key={index}>
-								<AlertDescription>{analise}</AlertDescription>
+					<CardContent className="space-y-2">
+						{analises.map((txt, i) => (
+							<Alert key={i} className="py-2">
+								<AlertDescription>{txt}</AlertDescription>
 							</Alert>
 						))}
 					</CardContent>

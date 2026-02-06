@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NumberInput } from "@/components/ui/number-input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	Select,
 	SelectContent,
@@ -15,9 +15,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Info, Calculator } from "lucide-react";
-import { type DadosEvento } from "@/lib/calculator-utils";
+import { type DadosEvento } from "@/lib/calculator-utils-evento";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchPopup } from "@/components/layout/search-popup";
+import { EquipamentosManager } from "./equipamentos-manager";
+import { type EquipamentoDepreciacao } from "@/lib/calculator-utils-anual";
 
 interface FormEventoProps {
 	onCalculate: (dados: DadosEvento) => void;
@@ -32,13 +34,11 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 	const [fotosVendidas, setFotosVendidas] = useState("");
 	const [faturamentoBruto, setFaturamentoBruto] = useState("");
 	const [custos, setCustos] = useState("");
-	const [valorCamera, setValorCamera] = useState("");
 	const [usarDepreciacaoPorTempo, setUsarDepreciacaoPorTempo] = useState(false);
-	const [anosDurabilidade, setAnosDurabilidade] = useState("");
-	const [quantidadeEquipamento, setQuantidadeEquipamento] = useState("1");
 	const [diasEvento, setDiasEvento] = useState("1");
-	const [vidaTotal, setVidaTotal] = useState("");
-	const [cliquesAtuais, setCliquesAtuais] = useState("");
+	const [equipamentos, setEquipamentos] = useState<EquipamentoDepreciacao[]>(
+		[],
+	);
 	const [showPopup, setShowPopup] = useState(false);
 
 	const parseCurrency = (value: string): number => {
@@ -66,37 +66,33 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 
 	// Calcular depreciação usando useMemo
 	const depreciacaoCalculada = useMemo(() => {
-		const valorCam = parseCurrency(valorCamera);
+		let total = 0;
+		const dias = Number(diasEvento) || 1;
+		const fotosMecanicas =
+			Number(fotosFeitasMecanicas) || Number(fotosFeitas) || 0;
 
-		if (usarDepreciacaoPorTempo) {
-			const anos = Number(anosDurabilidade) || 0;
-			const qtd = Number(quantidadeEquipamento) || 1;
-			const dias = Number(diasEvento) || 1;
-
-			if (valorCam > 0 && anos > 0) {
-				// Depreciação diária = (Valor * Qtd) / (Anos * 365)
-				const depDiaria = (valorCam * qtd) / (anos * 365);
-				return formatMoeda(depDiaria * dias);
+		equipamentos.forEach((equip) => {
+			if (usarDepreciacaoPorTempo) {
+				if (equip.anosDurabilidade && equip.anosDurabilidade > 0) {
+					const depDiaria =
+						(equip.valor * equip.quantidade) / (equip.anosDurabilidade * 365);
+					total += depDiaria * dias;
+				}
+			} else {
+				if (equip.tipo === "camera" && equip.vidaUtil && equip.vidaUtil > 0) {
+					const custoPorClique = equip.valor / equip.vidaUtil;
+					total += fotosMecanicas * custoPorClique * equip.quantidade;
+				}
 			}
-		} else {
-			const vidaTot = Number(vidaTotal) || 1;
-			const fotosMecanicas = Number(fotosFeitasMecanicas) || 0;
+		});
 
-			if (valorCam > 0 && vidaTot > 0 && fotosMecanicas > 0) {
-				const custoPorClique = valorCam / vidaTot;
-				const depreciacao = fotosMecanicas * custoPorClique;
-				return formatMoeda(depreciacao);
-			}
-		}
-		return "0,00";
+		return formatMoeda(total);
 	}, [
-		valorCamera,
-		vidaTotal,
-		fotosFeitasMecanicas,
+		equipamentos,
 		usarDepreciacaoPorTempo,
-		anosDurabilidade,
-		quantidadeEquipamento,
 		diasEvento,
+		fotosFeitasMecanicas,
+		fotosFeitas,
 	]);
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -107,14 +103,13 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 			tipo: tipo,
 			taxaPlataforma: tipo === "proprio" ? 10 : Number(taxaPlataforma) || 50,
 			fotosFeitas: Number(fotosFeitas) || 0,
+			fotosFeitasMecanicas: Number(fotosFeitasMecanicas) || 0,
 			fotosVendidas: Number(fotosVendidas) || 0,
 			precoFoto: precoMedioPorFoto,
-			depreciacao: parseCurrency(depreciacaoCalculada),
 			custos: parseCurrency(custos),
+			equipamentos,
 			usarDepreciacaoPorTempo,
-			anosDurabilidade: Number(anosDurabilidade),
 			diasEvento: Number(diasEvento),
-			quantidadeEquipamento: Number(quantidadeEquipamento),
 		};
 
 		if (
@@ -196,6 +191,78 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 						)}
 					</div>
 				</div>
+				{/* Equipamento */}
+				<div className="space-y-4">
+					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
+						📷 Equipamento
+					</h3>
+
+					<div className="flex items-center space-x-2 bg-secondary/20 p-3 rounded-md mb-4">
+						<input
+							type="checkbox"
+							id="usarDepreciacaoPorTempo"
+							className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+							checked={usarDepreciacaoPorTempo}
+							onChange={(e) => setUsarDepreciacaoPorTempo(e.target.checked)}
+						/>
+						<Label
+							htmlFor="usarDepreciacaoPorTempo"
+							className="text-sm font-medium cursor-pointer"
+						>
+							Calcular depreciação por tempo (Ideal para Mirrorless / Obturador
+							Eletrônico)
+						</Label>
+					</div>
+
+					<EquipamentosManager
+						equipamentos={equipamentos}
+						onChange={setEquipamentos}
+						usarDepreciacaoPorTempo={usarDepreciacaoPorTempo}
+					/>
+
+					{usarDepreciacaoPorTempo && (
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+							<div className="space-y-2">
+								<Label htmlFor="diasEvento">Duração do Evento (Dias)</Label>
+								<NumberInput
+									id="diasEvento"
+									placeholder="Ex: 1"
+									value={diasEvento}
+									onValueChange={setDiasEvento}
+								/>
+								<p className="text-sm text-muted-foreground">
+									Para cálculo de depreciação por tempo
+								</p>
+							</div>
+						</div>
+					)}
+
+					{/* Card com depreciação calculada */}
+					{parseCurrency(depreciacaoCalculada) > 0 && (
+						<Card className="bg-blue-50 border-blue-200">
+							<CardContent className="pt-6">
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-2">
+										<Calculator className="h-5 w-5 text-blue-600" />
+										<div>
+											<p className="text-sm font-medium text-blue-900">
+												Depreciação calculada
+											</p>
+											<p className="text-xs text-blue-700">
+												{usarDepreciacaoPorTempo
+													? `Baseado em ${diasEvento} dia(s) de uso`
+													: `Baseado em cliques do obturador`}
+											</p>
+										</div>
+									</div>
+									<div className="text-2xl font-bold text-blue-600">
+										R$ {depreciacaoCalculada}
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					)}
+				</div>
 
 				{/* Produção e Vendas */}
 				<div className="space-y-4">
@@ -257,129 +324,6 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 							</p>
 						</div>
 					</div>
-				</div>
-
-				{/* Equipamento */}
-				<div className="space-y-4">
-					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-						📷 Equipamento
-					</h3>
-
-					<div className="flex items-center space-x-2 bg-secondary/20 p-3 rounded-md mb-4">
-						<input
-							type="checkbox"
-							id="usarDepreciacaoPorTempo"
-							className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-							checked={usarDepreciacaoPorTempo}
-							onChange={(e) => setUsarDepreciacaoPorTempo(e.target.checked)}
-						/>
-						<Label
-							htmlFor="usarDepreciacaoPorTempo"
-							className="text-sm font-medium cursor-pointer"
-						>
-							Calcular depreciação por tempo (Ideal para Mirrorless / Obturador
-							Eletrônico)
-						</Label>
-					</div>
-
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
-							<CurrencyInput
-								id="valorCamera"
-								placeholder="Ex: 25.500,00"
-								value={valorCamera}
-								onValueChange={setValorCamera}
-							/>
-						</div>
-
-						{usarDepreciacaoPorTempo ? (
-							<>
-								<div className="space-y-2">
-									<Label htmlFor="anosDurabilidade">Durabilidade (Anos)</Label>
-									<NumberInput
-										id="anosDurabilidade"
-										placeholder="Ex: 5"
-										value={anosDurabilidade}
-										onValueChange={setAnosDurabilidade}
-									/>
-									<p className="text-xs text-muted-foreground">
-										Tempo estimado de troca
-									</p>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="diasEvento">Duração do Evento (Dias)</Label>
-									<NumberInput
-										id="diasEvento"
-										placeholder="Ex: 1"
-										value={diasEvento}
-										onValueChange={setDiasEvento}
-									/>
-								</div>
-							</>
-						) : (
-							<>
-								<div className="space-y-2">
-									<Label htmlFor="vidaTotal">Vida útil do obturador</Label>
-									<NumberInput
-										id="vidaTotal"
-										placeholder="Ex: 350.000"
-										value={vidaTotal}
-										onValueChange={setVidaTotal}
-									/>
-									<p className="text-sm text-muted-foreground">
-										Total de cliques esperados
-									</p>
-								</div>
-
-								<div className="space-y-2">
-									<Label htmlFor="cliquesAtuais">Cliques atuais</Label>
-									<NumberInput
-										id="cliquesAtuais"
-										placeholder="Ex: 98.600"
-										value={cliquesAtuais}
-										onValueChange={setCliquesAtuais}
-									/>
-									<p className="text-sm text-muted-foreground">
-										Contagem do obturador
-									</p>
-								</div>
-							</>
-						)}
-					</div>
-
-					{/* Card com depreciação calculada */}
-					{parseCurrency(depreciacaoCalculada) > 0 && (
-						<Card className="bg-blue-50 border-blue-200">
-							<CardContent className="pt-6">
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										<Calculator className="h-5 w-5 text-blue-600" />
-										<div>
-											<p className="text-sm font-medium text-blue-900">
-												Depreciação calculada
-											</p>
-											<p className="text-xs text-blue-700">
-												{usarDepreciacaoPorTempo
-													? `${diasEvento} dias × R$ ${formatMoeda(
-															(parseCurrency(valorCamera) *
-																(Number(quantidadeEquipamento) || 1)) /
-																((Number(anosDurabilidade) || 1) * 365),
-														)} por dia`
-													: `${Number(fotosFeitasMecanicas).toLocaleString("pt-BR")} fotos (mec) × R$ ${formatMoeda(
-															parseCurrency(valorCamera) /
-																(Number(vidaTotal) || 1),
-														)} por clique`}
-											</p>
-										</div>
-									</div>
-									<div className="text-2xl font-bold text-blue-600">
-										R$ {depreciacaoCalculada}
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
 				</div>
 
 				{/* Custos */}

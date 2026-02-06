@@ -5,16 +5,19 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-	type ResultadoAnual as TipoResultadoAnual,
+	type ResultadoAnual,
 	type DadosAnuais,
+	gerarRecomendacoes,
+} from "@/lib/calculator-utils-anual";
+import {
 	formatMoeda,
 	formatNumero,
 	formatPorcentagem,
-	gerarRecomendacoes,
 } from "@/lib/calculator-utils";
+import { Camera, Aperture, Box } from "lucide-react";
 
 interface ResultadoAnualProps {
-	resultado: TipoResultadoAnual;
+	resultado: ResultadoAnual;
 	dados: DadosAnuais;
 }
 
@@ -27,7 +30,7 @@ const nivelStyles: Record<string, string> = {
 	lenda: "bg-purple-100 text-purple-800",
 };
 
-export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
+export function ResultadoAnualV2({ resultado, dados }: ResultadoAnualProps) {
 	const { lucroLiquido, roi } = resultado;
 
 	let statusNegocio = "";
@@ -134,6 +137,82 @@ export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
 				</Card>
 			</div>
 
+			{/* Depreciação Detalhada */}
+			<Card>
+				<CardHeader>
+					<CardTitle>📷 Depreciação de Equipamentos</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+						<Card className="bg-blue-50 border-blue-200">
+							<CardContent className="pt-6">
+								<div className="flex items-center gap-2 mb-2">
+									<Camera className="h-5 w-5 text-blue-600" />
+									<p className="text-sm font-medium text-blue-900">Câmeras</p>
+								</div>
+								<div className="text-2xl font-bold text-blue-600">
+									R$ {formatMoeda(resultado.depreciacaoDetalhada.cameras)}
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card className="bg-green-50 border-green-200">
+							<CardContent className="pt-6">
+								<div className="flex items-center gap-2 mb-2">
+									<Aperture className="h-5 w-5 text-green-600" />
+									<p className="text-sm font-medium text-green-900">Lentes</p>
+								</div>
+								<div className="text-2xl font-bold text-green-600">
+									R$ {formatMoeda(resultado.depreciacaoDetalhada.lentes)}
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card className="bg-gray-50 border-gray-200">
+							<CardContent className="pt-6">
+								<div className="flex items-center gap-2 mb-2">
+									<Box className="h-5 w-5 text-gray-600" />
+									<p className="text-sm font-medium text-gray-900">Outros</p>
+								</div>
+								<div className="text-2xl font-bold text-gray-600">
+									R$ {formatMoeda(resultado.depreciacaoDetalhada.outros)}
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+					{/* Lista Detalhada */}
+					<div className="space-y-2">
+						<p className="text-sm font-medium text-muted-foreground mb-3">
+							Detalhamento por Item:
+						</p>
+						{resultado.depreciacaoDetalhada.itens.map((item, index) => (
+							<div
+								key={index}
+								className="flex justify-between items-center p-3 bg-muted/50 rounded-lg"
+							>
+								<div className="flex items-center gap-2">
+									{item.tipo === "camera" && (
+										<Camera className="h-4 w-4 text-blue-600" />
+									)}
+									{item.tipo === "lente" && (
+										<Aperture className="h-4 w-4 text-green-600" />
+									)}
+									{item.tipo === "outro" && (
+										<Box className="h-4 w-4 text-gray-600" />
+									)}
+									<span className="font-medium">{item.nome}</span>
+								</div>
+								<span className="text-sm font-semibold">
+									R$ {formatMoeda(item.valor)}
+								</span>
+							</div>
+						))}
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* Métricas de Performance */}
 			<Card>
 				<CardHeader>
 					<CardTitle>📊 Métricas de Performance</CardTitle>
@@ -202,23 +281,24 @@ export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
 				</CardContent>
 			</Card>
 
+			{/* Custos Detalhados */}
 			<Card>
 				<CardHeader>
 					<CardTitle>🔧 Custos Detalhados</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<div>
 							<div className="text-sm text-muted-foreground mb-1">
-								Depreciação Câmera
+								Depreciação Total
 							</div>
 							<div className="text-xl font-semibold">
 								R$ {formatMoeda(resultado.depreciacaoTotal)}
 							</div>
 							<p className="text-xs text-muted-foreground">
 								{dados.usarDepreciacaoPorTempo
-									? `Baseado em ${dados.anosDurabilidade || 0} anos`
-									: `R$ ${formatMoeda(resultado.custoPorClique)} por clique`}
+									? "Baseado em tempo de uso"
+									: "Baseado em cliques"}
 							</p>
 						</div>
 
@@ -235,42 +315,29 @@ export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
 							</p>
 						</div>
 
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								{dados.usarDepreciacaoPorTempo
-									? "Durabilidade Estimada"
-									: "Vida Útil Restante"}
-							</div>
-							<div className="text-xl font-semibold">
-								{dados.usarDepreciacaoPorTempo
-									? `${dados.anosDurabilidade || 0} Anos`
-									: `${formatPorcentagem(resultado.percentualVidaRestante, 1)}%`}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{dados.usarDepreciacaoPorTempo
-									? `${dados.quantidadeEquipamento || 1} equipamento(s)`
-									: `${formatNumero(resultado.vidaRestante)} cliques`}
-							</p>
-							{!dados.usarDepreciacaoPorTempo && (
-								<Progress
-									value={resultado.percentualVidaRestante}
-									className="mt-2"
-								/>
+						{!dados.usarDepreciacaoPorTempo &&
+							resultado.percentualVidaRestante > 0 && (
+								<div>
+									<div className="text-sm text-muted-foreground mb-1">
+										Vida Útil Restante
+									</div>
+									<div className="text-xl font-semibold">
+										{formatPorcentagem(resultado.percentualVidaRestante, 1)}%
+									</div>
+									<p className="text-xs text-muted-foreground">
+										{formatNumero(resultado.vidaRestante)} cliques
+									</p>
+									<Progress
+										value={resultado.percentualVidaRestante}
+										className="mt-2"
+									/>
+								</div>
 							)}
-						</div>
-
-						<div>
-							<div className="text-sm text-muted-foreground mb-1">
-								Fotos/Evento
-							</div>
-							<div className="text-xl font-semibold">
-								{formatNumero(resultado.fotosPorEvento)}
-							</div>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
 
+			{/* Recomendações */}
 			<Card>
 				<CardHeader>
 					<CardTitle>💡 Recomendações</CardTitle>

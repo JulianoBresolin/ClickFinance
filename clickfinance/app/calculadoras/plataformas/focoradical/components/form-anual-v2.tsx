@@ -7,31 +7,33 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { NumberInput } from "@/components/ui/number-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
-import { DadosAnuais } from "@/lib/calculator-utils";
+import {
+	type DadosAnuais,
+	type EquipamentoDepreciacao,
+} from "@/lib/calculator-utils-anual";
+import { EquipamentosManager } from "./equipamentos-manager";
 import { SearchPopup } from "@/components/layout/search-popup";
 
 interface FormAnualProps {
 	onCalculate: (dados: DadosAnuais) => void;
 }
 
-export function FormAnual({ onCalculate }: FormAnualProps) {
+export function FormAnualV2({ onCalculate }: FormAnualProps) {
+	const [equipamentos, setEquipamentos] = useState<EquipamentoDepreciacao[]>(
+		[],
+	);
+	const [usarDepreciacaoPorTempo, setUsarDepreciacaoPorTempo] = useState(false);
 	const [formData, setFormData] = useState({
-		valorCamera: "",
-		usarDepreciacaoPorTempo: false,
-		anosDurabilidade: "",
-		quantidadeEquipamento: "1",
 		vidaTotal: "",
-		cliquesAtuais: "", // Total de cliques (eletronico + mecanico)
-		cliquesAtuaisMecanicos: "", // Apenas cliques mecânicos
+		cliquesAtuaisMecanicos: "",
 		fotosTotais: "",
-		fotosTotaisMecanicas: "", // Apenas fotos com obturador mecânico
+		fotosTotaisMecanicas: "",
 		fotosVendidas: "",
 		eventos: "",
 		receitaLiquida: "",
 		custoEvento: "",
 	});
 	const [showPopup, setShowPopup] = useState(false);
-
 	const parseCurrency = (value: string): number => {
 		if (!value) return 0;
 		return Number(value.replace(/\./g, "").replace(",", "."));
@@ -40,13 +42,15 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
+		if (equipamentos.length === 0) {
+			alert("Adicione pelo menos um equipamento!");
+			return;
+		}
+
 		const dados: DadosAnuais = {
-			valorCamera: parseCurrency(formData.valorCamera),
-			usarDepreciacaoPorTempo: formData.usarDepreciacaoPorTempo,
-			anosDurabilidade: Number(formData.anosDurabilidade) || 0,
-			quantidadeEquipamento: Number(formData.quantidadeEquipamento) || 1,
-			vidaTotal: Number(formData.vidaTotal) || 1,
-			cliquesAtuais: Number(formData.cliquesAtuais) || 0, // Campo mantido para referência
+			equipamentos,
+			usarDepreciacaoPorTempo,
+			vidaTotal: Number(formData.vidaTotal) || 0,
 			cliquesAtuaisMecanicos: Number(formData.cliquesAtuaisMecanicos) || 0,
 			fotosTotais: Number(formData.fotosTotais) || 0,
 			fotosTotaisMecanicas: Number(formData.fotosTotaisMecanicas) || 0,
@@ -56,25 +60,12 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 			custoEvento: parseCurrency(formData.custoEvento),
 		};
 
-		// Validação condicional
 		if (dados.fotosVendidas === 0 || dados.receitaLiquida === 0) {
 			alert("Por favor, preencha os dados de vendas e receita!");
 			return;
 		}
 
-		if (dados.usarDepreciacaoPorTempo) {
-			if (dados.anosDurabilidade === 0) {
-				alert("Por favor, informe a durabilidade estimada em anos!");
-				return;
-			}
-		} else {
-			if (dados.fotosTotaisMecanicas === 0 && dados.vidaTotal > 0) {
-				// Aviso opcional ou permitir passar se for 100% eletrônico (mas aí a depreciação seria 0 neste modo)
-			}
-		}
-
 		onCalculate(dados);
-
 		// Mostrar popup após 5 segundos
 		setTimeout(() => {
 			setShowPopup(true);
@@ -86,31 +77,28 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 			<form onSubmit={handleSubmit} className="space-y-6">
 				<Alert>
 					<Info className="h-4 w-4" />
-					<AlertTitle>Uitlize valores brutos para o cálculo</AlertTitle>
+					<AlertTitle>Utilize valores líquidos para o cálculo</AlertTitle>
 					<AlertDescription>
-						Entre na sua conta da plataforma para pegar os valores brutos e
-						insira no formulário.
+						Entre na sua conta da plataforma para pegar os valores líquidos
+						(após taxas) e insira no formulário.
 					</AlertDescription>
 				</Alert>
 
-				{/* Equipamento */}
+				{/* Equipamentos */}
 				<div className="space-y-4">
-					<h3 className="text-lg font-semibold border-b-2 border-primary pb-2">
-						📷 Equipamento
-					</h3>
+					<div className="flex items-center justify-between">
+						<h3 className="text-lg font-semibold border-b-2 border-primary pb-2 flex-1">
+							📷 Equipamentos
+						</h3>
+					</div>
 
-					<div className="flex items-center space-x-2 bg-secondary/20 p-3 rounded-md mb-4">
+					<div className="flex items-center space-x-2 bg-secondary/20 p-3 rounded-md">
 						<input
 							type="checkbox"
 							id="usarDepreciacaoPorTempo"
 							className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-							checked={formData.usarDepreciacaoPorTempo}
-							onChange={(e) =>
-								setFormData({
-									...formData,
-									usarDepreciacaoPorTempo: e.target.checked,
-								})
-							}
+							checked={usarDepreciacaoPorTempo}
+							onChange={(e) => setUsarDepreciacaoPorTempo(e.target.checked)}
 						/>
 						<Label
 							htmlFor="usarDepreciacaoPorTempo"
@@ -121,49 +109,15 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 						</Label>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
-							<CurrencyInput
-								id="valorCamera"
-								placeholder="Ex: 18.500,00"
-								value={formData.valorCamera}
-								onValueChange={(value) =>
-									setFormData({ ...formData, valorCamera: value })
-								}
-							/>
-						</div>
+					<EquipamentosManager
+						equipamentos={equipamentos}
+						onChange={setEquipamentos}
+						usarDepreciacaoPorTempo={usarDepreciacaoPorTempo}
+					/>
 
-						{formData.usarDepreciacaoPorTempo ? (
-							<>
-								<div className="space-y-2">
-									<Label htmlFor="anosDurabilidade">Durabilidade (Anos)</Label>
-									<NumberInput
-										id="anosDurabilidade"
-										placeholder="Ex: 5"
-										value={formData.anosDurabilidade}
-										onValueChange={(value) =>
-											setFormData({ ...formData, anosDurabilidade: value })
-										}
-									/>
-									<p className="text-xs text-muted-foreground">
-										Tempo estimado de troca
-									</p>
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="quantidadeEquipamento">Quantidade</Label>
-									<NumberInput
-										id="quantidadeEquipamento"
-										placeholder="Ex: 1"
-										value={formData.quantidadeEquipamento}
-										onValueChange={(value) =>
-											setFormData({ ...formData, quantidadeEquipamento: value })
-										}
-									/>
-								</div>
-							</>
-						) : (
-							<>
+					{!usarDepreciacaoPorTempo &&
+						equipamentos.some((e) => e.tipo === "camera") && (
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 								<div className="space-y-2">
 									<Label htmlFor="vidaTotal">
 										Vida útil do obturador (cliques)
@@ -176,7 +130,11 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 											setFormData({ ...formData, vidaTotal: value })
 										}
 									/>
+									<p className="text-sm text-muted-foreground">
+										Da câmera principal
+									</p>
 								</div>
+
 								<div className="space-y-2">
 									<Label htmlFor="cliquesAtuaisMecanicos">
 										Cliques mecânicos atuais
@@ -192,23 +150,9 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 											})
 										}
 									/>
-									<p className="text-sm text-muted-foreground">
-										Contagem do obturador mecânico
-									</p>
 								</div>
-							</>
+							</div>
 						)}
-					</div>
-					{!formData.usarDepreciacaoPorTempo && (
-						<Alert>
-							<Info className="h-4 w-4" />
-							<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
-							<AlertDescription>
-								Se usa obturador eletrônico, recomendamos ativar a opção
-								Calcular depreciação por tempo acima.
-							</AlertDescription>
-						</Alert>
-					)}
 				</div>
 
 				{/* Produção */}
@@ -229,7 +173,8 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 								}
 							/>
 						</div>
-						{!formData.usarDepreciacaoPorTempo && (
+
+						{!usarDepreciacaoPorTempo && (
 							<div className="space-y-2">
 								<Label htmlFor="fotosTotaisMecanicas">
 									Fotos com obturador mecânico

@@ -2,26 +2,28 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormAnual } from "@/app/calculadoras/plataformas/focoradical/components/form-anual";
+import { FormAnualV2 } from "@/app/calculadoras/plataformas/focoradical/components/form-anual-v2";
+import { ResultadoAnualV2 } from "@/app/calculadoras/plataformas/focoradical/components/resultado-anual-v2";
 import { FormEvento } from "@/app/calculadoras/plataformas/focoradical/components/form-evento";
-import { ResultadoAnual } from "@/app/calculadoras/plataformas/focoradical/components/resultado-anual";
-import { ResultadoEvento } from "@/app/calculadoras/plataformas/focoradical/components/resultado-evento";
+import { ResultadoEvento } from "@/app/calculadoras/plataformas/focoradical/components//resultado-evento";
 import {
 	calcularAnual,
-	calcularEvento,
-	DadosAnuais,
-	DadosEvento,
-	ResultadoAnual as TipoResultadoAnual,
-	ResultadoEvento as TipoResultadoEvento,
-} from "@/lib/calculator-utils";
+	type DadosAnuais as DadosAnuaisV2,
+	type ResultadoAnual as TipoResultadoAnualV2,
+} from "@/lib/calculator-utils-anual";
+import {
+	calcularEvento as calcularEventoV2,
+	type DadosEvento as DadosEventoV2,
+	type ResultadoEvento as TipoResultadoEventoV2,
+} from "@/lib/calculator-utils-evento";
 
 export default function CalculadoraPage() {
 	const [resultadoAnual, setResultadoAnual] =
-		useState<TipoResultadoAnual | null>(null);
-	const [dadosAnual, setDadosAnual] = useState<DadosAnuais | null>(null);
+		useState<TipoResultadoAnualV2 | null>(null);
+	const [dadosAnual, setDadosAnual] = useState<DadosAnuaisV2 | null>(null);
 	const [resultadoEvento, setResultadoEvento] =
-		useState<TipoResultadoEvento | null>(null);
-	const [dadosEvento, setDadosEvento] = useState<DadosEvento | null>(null);
+		useState<TipoResultadoEventoV2 | null>(null);
+	const [dadosEvento, setDadosEvento] = useState<DadosEventoV2 | null>(null);
 
 	const resultadoAnualRef = useRef<HTMLDivElement>(null);
 	const resultadoEventoRef = useRef<HTMLDivElement>(null);
@@ -38,20 +40,20 @@ export default function CalculadoraPage() {
 		}
 	}, [resultadoEvento]);
 
-	const handleCalcularAnual = (dados: DadosAnuais) => {
+	const handleCalcularAnual = (dados: DadosAnuaisV2) => {
 		const resultado = calcularAnual(dados);
 		setResultadoAnual(resultado);
 		setDadosAnual(dados);
 	};
 
-	const handleCalcularEvento = (dados: DadosEvento) => {
-		const resultado = calcularEvento(dados);
+	const handleCalcularEvento = (dados: DadosEventoV2) => {
+		const resultado = calcularEventoV2(dados);
 		setResultadoEvento(resultado);
 		setDadosEvento(dados);
 	};
 
 	return (
-		<div className="min-h-screen bg-linear-to-br from-[#8d6e63] via-[#ac968e] to-[#f0cdc1] ">
+		<div className="min-h-screen bg-linear-to-br from-[#8d6e63] via-[#ac968e] to-[#f0cdc1]">
 			<div className="container mx-auto px-4 py-8">
 				<div className="max-w-6xl mx-auto">
 					{/* Header */}
@@ -61,33 +63,33 @@ export default function CalculadoraPage() {
 						</h1>
 						<p className="text-lg opacity-90">
 							Análise completa para fotógrafos de plataforma (Focoradical,
-							outras )
+							Fotto, Balenk)
 						</p>
 					</div>
 
 					{/* Tabs */}
 					<Tabs defaultValue="anual" className="space-y-6">
-						<TabsList className="grid w-full grid-cols-2 bg-white/50 backdrop-blur ">
-							<TabsTrigger value="anual" className="text-base cursor-pointer">
+						<TabsList className="grid w-full grid-cols-2 bg-white/90 backdrop-blur">
+							<TabsTrigger value="anual" className="text-base">
 								📊 Análise Anual
 							</TabsTrigger>
-							<TabsTrigger value="evento" className="text-base cursor-pointer">
+							<TabsTrigger value="evento" className="text-base">
 								🎯 Análise por Evento
 							</TabsTrigger>
 						</TabsList>
 
 						{/* Tab Análise Anual */}
 						<TabsContent value="anual" className="space-y-6">
-							<div className="bg-white rounded-lg shadow-2xl p-6">
-								<FormAnual onCalculate={handleCalcularAnual} />
+							<div className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6">
+								<FormAnualV2 onCalculate={handleCalcularAnual} />
 							</div>
 
 							{resultadoAnual && dadosAnual && (
 								<div
 									ref={resultadoAnualRef}
-									className="bg-white rounded-lg shadow-2xl p-6 scroll-mt-24"
+									className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6 scroll-mt-24"
 								>
-									<ResultadoAnual
+									<ResultadoAnualV2
 										resultado={resultadoAnual}
 										dados={dadosAnual}
 									/>
@@ -97,14 +99,14 @@ export default function CalculadoraPage() {
 
 						{/* Tab Análise por Evento */}
 						<TabsContent value="evento" className="space-y-6">
-							<div className="bg-white rounded-lg shadow-2xl p-6">
+							<div className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6">
 								<FormEvento onCalculate={handleCalcularEvento} />
 							</div>
 
 							{resultadoEvento && dadosEvento && (
 								<div
 									ref={resultadoEventoRef}
-									className="bg-white rounded-lg shadow-2xl p-6 scroll-mt-24"
+									className="bg-white/90 backdrop-blur rounded-lg shadow-2xl p-6 scroll-mt-24"
 								>
 									<ResultadoEvento
 										resultado={resultadoEvento}

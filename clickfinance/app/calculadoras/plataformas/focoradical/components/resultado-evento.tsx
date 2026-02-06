@@ -3,17 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-	type ResultadoEvento as TipoResultadoEvento,
-	type DadosEvento,
+	type ResultadoEvento as TipoResultadoEventoV2,
+	type DadosEvento as DadosEventoV2,
 	formatMoeda,
 	formatNumero,
 	formatPorcentagem,
 	gerarAnaliseEvento,
-} from "@/lib/calculator-utils";
+} from "@/lib/calculator-utils-evento";
 
 interface ResultadoEventoProps {
-	resultado: TipoResultadoEvento;
-	dados: DadosEvento;
+	resultado: TipoResultadoEventoV2;
+	dados: DadosEventoV2;
 }
 
 export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
@@ -193,7 +193,7 @@ export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
 								Depreciação Equipamento
 							</div>
 							<div className="text-xl font-semibold">
-								R$ {formatMoeda(dados.depreciacao)}
+								R$ {formatMoeda(resultado.depreciacaoTotal)}
 							</div>
 							<p className="text-xs text-muted-foreground">
 								{dados.usarDepreciacaoPorTempo

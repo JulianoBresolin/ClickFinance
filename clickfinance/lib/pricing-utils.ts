@@ -7,6 +7,7 @@ export interface DadosPrecificacao {
 	// Custos do Equipamento
 	valorEquipamento: number; // Valor total do seu equipamento (câmera, lentes)
 	vidaUtilEquipamentoCliques: number; // Vida útil em cliques do obturador
+	tempoDepreciacaoAnos: number; // Tempo de depreciação em anos
 
 	// Custos do Evento
 	custoOperacional: number; // Custo operacional por evento (transporte, etc)
@@ -31,6 +32,7 @@ export interface ResultadoPrecificacao {
 	taxaPlataformaValor: number;
 	receitaLiquidaEstimada: number;
 	custoTotalEstimado: number;
+	custoDepreciacaoEstimado: number;
 	lucroLiquidoEstimado: number;
 	margemLucroReal: number;
 	roiEstimado: number;
@@ -66,7 +68,18 @@ export function calcularPrecificacao(
 		dados.vidaUtilEquipamentoCliques > 0
 			? dados.valorEquipamento / dados.vidaUtilEquipamentoCliques
 			: 0;
-	const depreciacaoTotal = custoPorClique * dados.fotosEstimadasEvento;
+	const depreciacaoCliques = custoPorClique * dados.fotosEstimadasEvento;
+
+	// Depreciação por tempo (Mensal)
+	const depreciacaoMensal =
+		dados.tempoDepreciacaoAnos > 0
+			? dados.valorEquipamento / (dados.tempoDepreciacaoAnos * 12)
+			: 0;
+
+	const depreciacaoTempoPorEvento =
+		dados.eventosPorMes > 0 ? depreciacaoMensal / dados.eventosPorMes : 0;
+
+	const depreciacaoTotal = depreciacaoCliques + depreciacaoTempoPorEvento;
 
 	// Custo total do evento
 	const custoTotalEvento =
@@ -140,6 +153,7 @@ export function calcularPrecificacao(
 		taxaPlataformaValor,
 		receitaLiquidaEstimada,
 		custoTotalEstimado: custoTotalEvento,
+		custoDepreciacaoEstimado: depreciacaoTotal,
 		lucroLiquidoEstimado,
 		margemLucroReal,
 		roiEstimado,

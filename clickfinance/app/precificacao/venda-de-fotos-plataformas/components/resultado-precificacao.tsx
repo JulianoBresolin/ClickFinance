@@ -75,7 +75,7 @@ export function ResultadoPrecificacao({
 					<CardTitle>💰 Projeção Financeira</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 						<div>
 							<div className="text-sm text-muted-foreground mb-1">
 								Receita Bruta
@@ -101,6 +101,19 @@ export function ResultadoPrecificacao({
 							<div className="text-xl font-semibold text-green-600">
 								R$ {formatMoeda(resultado.receitaLiquidaEstimada)}
 							</div>
+						</div>
+
+						<div>
+							<div className="text-sm text-muted-foreground mb-1">
+								Custo Total
+							</div>
+							<div className="text-xl font-semibold text-red-600">
+								-R$ {formatMoeda(resultado.custoTotalEstimado)}
+							</div>
+							<p className="text-xs text-muted-foreground">
+								Depreciação: R${" "}
+								{formatMoeda(resultado.custoDepreciacaoEstimado)}
+							</p>
 						</div>
 
 						<div>

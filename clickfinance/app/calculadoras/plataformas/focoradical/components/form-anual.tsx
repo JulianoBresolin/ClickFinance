@@ -17,6 +17,9 @@ interface FormAnualProps {
 export function FormAnual({ onCalculate }: FormAnualProps) {
 	const [formData, setFormData] = useState({
 		valorCamera: "",
+		usarDepreciacaoPorTempo: false,
+		anosDurabilidade: "",
+		quantidadeEquipamento: "1",
 		vidaTotal: "",
 		cliquesAtuais: "", // Total de cliques (eletronico + mecanico)
 		cliquesAtuaisMecanicos: "", // Apenas cliques mecânicos
@@ -39,6 +42,9 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 
 		const dados: DadosAnuais = {
 			valorCamera: parseCurrency(formData.valorCamera),
+			usarDepreciacaoPorTempo: formData.usarDepreciacaoPorTempo,
+			anosDurabilidade: Number(formData.anosDurabilidade) || 0,
+			quantidadeEquipamento: Number(formData.quantidadeEquipamento) || 1,
 			vidaTotal: Number(formData.vidaTotal) || 1,
 			cliquesAtuais: Number(formData.cliquesAtuais) || 0, // Campo mantido para referência
 			cliquesAtuaisMecanicos: Number(formData.cliquesAtuaisMecanicos) || 0,
@@ -50,13 +56,21 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 			custoEvento: parseCurrency(formData.custoEvento),
 		};
 
-		if (
-			dados.fotosTotaisMecanicas === 0 ||
-			dados.fotosVendidas === 0 ||
-			dados.receitaLiquida === 0
-		) {
-			alert("Por favor, preencha os campos obrigatórios!");
+		// Validação condicional
+		if (dados.fotosVendidas === 0 || dados.receitaLiquida === 0) {
+			alert("Por favor, preencha os dados de vendas e receita!");
 			return;
+		}
+
+		if (dados.usarDepreciacaoPorTempo) {
+			if (dados.anosDurabilidade === 0) {
+				alert("Por favor, informe a durabilidade estimada em anos!");
+				return;
+			}
+		} else {
+			if (dados.fotosTotaisMecanicas === 0 && dados.vidaTotal > 0) {
+				// Aviso opcional ou permitir passar se for 100% eletrônico (mas aí a depreciação seria 0 neste modo)
+			}
 		}
 
 		onCalculate(dados);
@@ -85,6 +99,28 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 						📷 Equipamento
 					</h3>
 
+					<div className="flex items-center space-x-2 bg-secondary/20 p-3 rounded-md mb-4">
+						<input
+							type="checkbox"
+							id="usarDepreciacaoPorTempo"
+							className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+							checked={formData.usarDepreciacaoPorTempo}
+							onChange={(e) =>
+								setFormData({
+									...formData,
+									usarDepreciacaoPorTempo: e.target.checked,
+								})
+							}
+						/>
+						<Label
+							htmlFor="usarDepreciacaoPorTempo"
+							className="text-sm font-medium cursor-pointer"
+						>
+							Calcular depreciação por tempo de uso (Ideal para Mirrorless /
+							Obturador Eletrônico)
+						</Label>
+					</div>
+
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="valorCamera">Valor da câmera (R$)</Label>
@@ -98,45 +134,81 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 							/>
 						</div>
 
-						<div className="space-y-2">
-							<Label htmlFor="vidaTotal">
-								Vida útil do obturador (cliques)
-							</Label>
-							<NumberInput
-								id="vidaTotal"
-								placeholder="Ex: 300.000"
-								value={formData.vidaTotal}
-								onValueChange={(value) =>
-									setFormData({ ...formData, vidaTotal: value })
-								}
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="cliquesAtuaisMecanicos">
-								Cliques mecânicos atuais
-							</Label>
-							<NumberInput
-								id="cliquesAtuaisMecanicos"
-								placeholder="Ex: 35.600"
-								value={formData.cliquesAtuaisMecanicos}
-								onValueChange={(value) =>
-									setFormData({ ...formData, cliquesAtuaisMecanicos: value })
-								}
-							/>
-							<p className="text-sm text-muted-foreground">
-								Contagem do obturador mecânico
-							</p>
-						</div>
+						{formData.usarDepreciacaoPorTempo ? (
+							<>
+								<div className="space-y-2">
+									<Label htmlFor="anosDurabilidade">Durabilidade (Anos)</Label>
+									<NumberInput
+										id="anosDurabilidade"
+										placeholder="Ex: 5"
+										value={formData.anosDurabilidade}
+										onValueChange={(value) =>
+											setFormData({ ...formData, anosDurabilidade: value })
+										}
+									/>
+									<p className="text-xs text-muted-foreground">
+										Tempo estimado de troca
+									</p>
+								</div>
+								<div className="space-y-2">
+									<Label htmlFor="quantidadeEquipamento">Quantidade</Label>
+									<NumberInput
+										id="quantidadeEquipamento"
+										placeholder="Ex: 1"
+										value={formData.quantidadeEquipamento}
+										onValueChange={(value) =>
+											setFormData({ ...formData, quantidadeEquipamento: value })
+										}
+									/>
+								</div>
+							</>
+						) : (
+							<>
+								<div className="space-y-2">
+									<Label htmlFor="vidaTotal">
+										Vida útil do obturador (cliques)
+									</Label>
+									<NumberInput
+										id="vidaTotal"
+										placeholder="Ex: 300.000"
+										value={formData.vidaTotal}
+										onValueChange={(value) =>
+											setFormData({ ...formData, vidaTotal: value })
+										}
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label htmlFor="cliquesAtuaisMecanicos">
+										Cliques mecânicos atuais
+									</Label>
+									<NumberInput
+										id="cliquesAtuaisMecanicos"
+										placeholder="Ex: 35.600"
+										value={formData.cliquesAtuaisMecanicos}
+										onValueChange={(value) =>
+											setFormData({
+												...formData,
+												cliquesAtuaisMecanicos: value,
+											})
+										}
+									/>
+									<p className="text-sm text-muted-foreground">
+										Contagem do obturador mecânico
+									</p>
+								</div>
+							</>
+						)}
 					</div>
-					<Alert>
-						<Info className="h-4 w-4" />
-						<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
-						<AlertDescription>
-							Para o cálculo de depreciação, considere apenas os cliques do
-							obturador mecânico. O obturador eletrônico não sofre desgaste
-							físico.
-						</AlertDescription>
-					</Alert>
+					{!formData.usarDepreciacaoPorTempo && (
+						<Alert>
+							<Info className="h-4 w-4" />
+							<AlertTitle>Atenção Usuários de Mirrorless!</AlertTitle>
+							<AlertDescription>
+								Se usa obturador eletrônico, recomendamos ativar a opção
+								Calcular depreciação por tempo acima.
+							</AlertDescription>
+						</Alert>
+					)}
 				</div>
 
 				{/* Produção */}
@@ -157,19 +229,21 @@ export function FormAnual({ onCalculate }: FormAnualProps) {
 								}
 							/>
 						</div>
-						<div className="space-y-2">
-							<Label htmlFor="fotosTotaisMecanicas">
-								Fotos com obturador mecânico
-							</Label>
-							<NumberInput
-								id="fotosTotaisMecanicas"
-								placeholder="Ex: 150.000"
-								value={formData.fotosTotaisMecanicas}
-								onValueChange={(value) =>
-									setFormData({ ...formData, fotosTotaisMecanicas: value })
-								}
-							/>
-						</div>
+						{!formData.usarDepreciacaoPorTempo && (
+							<div className="space-y-2">
+								<Label htmlFor="fotosTotaisMecanicas">
+									Fotos com obturador mecânico
+								</Label>
+								<NumberInput
+									id="fotosTotaisMecanicas"
+									placeholder="Ex: 150.000"
+									value={formData.fotosTotaisMecanicas}
+									onValueChange={(value) =>
+										setFormData({ ...formData, fotosTotaisMecanicas: value })
+									}
+								/>
+							</div>
+						)}
 
 						<div className="space-y-2">
 							<Label htmlFor="fotosVendidas">Fotos vendidas</Label>

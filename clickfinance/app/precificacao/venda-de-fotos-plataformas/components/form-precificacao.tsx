@@ -21,6 +21,7 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 	const [valorEquipamento, setValorEquipamento] = useState("");
 	const [vidaUtilEquipamentoCliques, setVidaUtilEquipamentoCliques] =
 		useState("");
+	const [tempoDepreciacaoAnos, setTempoDepreciacaoAnos] = useState("");
 	const [custoOperacional, setCustoOperacional] = useState("");
 	const [fotosEstimadasEvento, setFotosEstimadasEvento] = useState("");
 	const [taxaPlataforma, setTaxaPlataforma] = useState(10);
@@ -41,6 +42,7 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 			eventosPorMes: parseCurrency(eventosPorMes),
 			valorEquipamento: parseCurrency(valorEquipamento),
 			vidaUtilEquipamentoCliques: parseCurrency(vidaUtilEquipamentoCliques),
+			tempoDepreciacaoAnos: parseCurrency(tempoDepreciacaoAnos),
 			custoOperacional: parseCurrency(custoOperacional),
 
 			fotosEstimadasEvento: parseCurrency(fotosEstimadasEvento),
@@ -86,7 +88,7 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 							</Label>
 							<CurrencyInput
 								id="custosFixosMensais"
-								placeholder="Ex: 250,00"
+								placeholder="Ex: 2,500"
 								value={custosFixosMensais}
 								onValueChange={setCustosFixosMensais}
 							/>
@@ -137,6 +139,21 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 							/>
 							<p className="text-sm text-muted-foreground">
 								Em cliques (obturador mecânico).
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="tempoDepreciacaoAnos">
+								Tempo de troca (anos)
+							</Label>
+							<NumberInput
+								id="tempoDepreciacaoAnos"
+								placeholder="Ex: 3"
+								value={tempoDepreciacaoAnos}
+								onValueChange={setTempoDepreciacaoAnos}
+							/>
+							<p className="text-sm text-muted-foreground">
+								Em quantos anos pretende trocar o equipamento.
 							</p>
 						</div>
 					</div>

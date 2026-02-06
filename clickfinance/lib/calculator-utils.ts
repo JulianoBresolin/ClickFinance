@@ -30,13 +30,16 @@ export interface DadosAnuais {
 	valorCamera: number;
 	vidaTotal: number;
 	cliquesAtuais: number;
-	cliquesAtuaisMecanicos: number;
+	cliquesAtuaisMecanicos?: number;
 	fotosTotais: number;
-	fotosTotaisMecanicas: number;
+	fotosTotaisMecanicas?: number;
 	fotosVendidas: number;
 	eventos: number;
 	receitaLiquida: number;
 	custoEvento: number;
+	usarDepreciacaoPorTempo?: boolean;
+	anosDurabilidade?: number;
+	quantidadeEquipamento?: number;
 }
 
 export interface ResultadoAnual {
@@ -68,6 +71,10 @@ export interface DadosEvento {
 	precoFoto: number;
 	depreciacao: number;
 	custos: number;
+	usarDepreciacaoPorTempo?: boolean;
+	anosDurabilidade?: number;
+	diasEvento?: number;
+	quantidadeEquipamento?: number;
 }
 
 export interface ResultadoEvento {
@@ -92,10 +99,39 @@ export interface Nivel {
 // Cálculos
 export function calcularAnual(dados: DadosAnuais): ResultadoAnual {
 	// A depreciacao é baseada apenas nos cliques mecânicos
-	const custoPorClique = dados.valorCamera / dados.vidaTotal;
-	const depreciacaoTotal = dados.fotosTotaisMecanicas * custoPorClique;
-	const vidaRestante = dados.vidaTotal - dados.cliquesAtuaisMecanicos;
-	const percentualVidaRestante = (vidaRestante / dados.vidaTotal) * 100;
+	let custoPorClique = 0;
+	let depreciacaoTotal = 0;
+	let vidaRestante = 0;
+	let percentualVidaRestante = 0;
+
+	if (
+		dados.usarDepreciacaoPorTempo &&
+		dados.anosDurabilidade &&
+		dados.anosDurabilidade > 0
+	) {
+		const quantidade = dados.quantidadeEquipamento || 1;
+		// Depreciação Anual = (Valor * Qtd) / Anos
+		depreciacaoTotal =
+			(dados.valorCamera * quantidade) / dados.anosDurabilidade;
+
+		// Mantemos métricas de clique se disponíveis para referência
+		if (dados.vidaTotal > 0) {
+			custoPorClique = dados.valorCamera / dados.vidaTotal;
+			if (dados.cliquesAtuaisMecanicos !== undefined) {
+				vidaRestante = dados.vidaTotal - dados.cliquesAtuaisMecanicos;
+				percentualVidaRestante = (vidaRestante / dados.vidaTotal) * 100;
+			}
+		}
+	} else {
+		custoPorClique =
+			dados.vidaTotal > 0 ? dados.valorCamera / dados.vidaTotal : 0;
+		const fotosMecanicas = dados.fotosTotaisMecanicas || 0;
+		depreciacaoTotal = fotosMecanicas * custoPorClique;
+		const cliquesAtuaisMec = dados.cliquesAtuaisMecanicos || 0;
+		vidaRestante = dados.vidaTotal - cliquesAtuaisMec;
+		percentualVidaRestante =
+			dados.vidaTotal > 0 ? (vidaRestante / dados.vidaTotal) * 100 : 0;
+	}
 
 	const custoOperacional = dados.eventos * dados.custoEvento;
 	const custoTotal = depreciacaoTotal + custoOperacional;
@@ -161,6 +197,15 @@ export function calcularEvento(dados: DadosEvento): ResultadoEvento {
 		margemPorFoto,
 		roi,
 	};
+}
+
+export function calcularDepreciacaoMensal(
+	valor: number,
+	anos: number,
+	quantidade: number = 1,
+): number {
+	if (anos <= 0) return 0;
+	return (valor * quantidade) / (anos * 12);
 }
 
 export function determinarNivel(mediaMensal: number): Nivel {

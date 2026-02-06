@@ -112,7 +112,9 @@ export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
 								-R$ {formatMoeda(resultado.custoTotal)}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								Depreciação + Operacional
+								{dados.usarDepreciacaoPorTempo
+									? "Depreciação (Tempo) + Operacional"
+									: "Depreciação (Cliques) + Operacional"}
 							</p>
 						</div>
 					</div>
@@ -175,6 +177,40 @@ export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
 							>
 								{formatPorcentagem(resultado.roi, 1)}%
 							</div>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>🔧 Custos Detalhados</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div>
+							<div className="text-sm text-muted-foreground mb-1">
+								Depreciação Equipamento
+							</div>
+							<div className="text-xl font-semibold">
+								R$ {formatMoeda(dados.depreciacao)}
+							</div>
+							<p className="text-xs text-muted-foreground">
+								{dados.usarDepreciacaoPorTempo
+									? `${dados.diasEvento || 1} dia(s) de uso`
+									: "Baseado em cliques do obturador"}
+							</p>
+						</div>
+						<div>
+							<div className="text-sm text-muted-foreground mb-1">
+								Custos Operacionais
+							</div>
+							<div className="text-xl font-semibold">
+								R$ {formatMoeda(dados.custos)}
+							</div>
+							<p className="text-xs text-muted-foreground">
+								Logística, alimentação, etc.
+							</p>
 						</div>
 					</div>
 				</CardContent>

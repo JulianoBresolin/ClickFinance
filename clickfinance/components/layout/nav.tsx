@@ -114,6 +114,12 @@ export default function Nav() {
 								Venda de fotos em plataformas
 							</Link>
 						</div>
+						<Link
+							href="/pesquisa"
+							className="text-sm font-medium text-muted-foreground hover:text-foreground"
+						>
+							Pesquisa
+						</Link>
 					</div>
 				</SheetContent>
 			</Sheet>

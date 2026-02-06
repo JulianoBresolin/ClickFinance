@@ -216,7 +216,9 @@ export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
 								R$ {formatMoeda(resultado.depreciacaoTotal)}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								R$ {formatMoeda(resultado.custoPorClique)} por clique
+								{dados.usarDepreciacaoPorTempo
+									? `Baseado em ${dados.anosDurabilidade || 0} anos`
+									: `R$ ${formatMoeda(resultado.custoPorClique)} por clique`}
 							</p>
 						</div>
 
@@ -235,18 +237,26 @@ export function ResultadoAnual({ resultado, dados }: ResultadoAnualProps) {
 
 						<div>
 							<div className="text-sm text-muted-foreground mb-1">
-								Vida Útil Restante
+								{dados.usarDepreciacaoPorTempo
+									? "Durabilidade Estimada"
+									: "Vida Útil Restante"}
 							</div>
 							<div className="text-xl font-semibold">
-								{formatPorcentagem(resultado.percentualVidaRestante, 1)}%
+								{dados.usarDepreciacaoPorTempo
+									? `${dados.anosDurabilidade || 0} Anos`
+									: `${formatPorcentagem(resultado.percentualVidaRestante, 1)}%`}
 							</div>
 							<p className="text-xs text-muted-foreground">
-								{formatNumero(resultado.vidaRestante)} cliques
+								{dados.usarDepreciacaoPorTempo
+									? `${dados.quantidadeEquipamento || 1} equipamento(s)`
+									: `${formatNumero(resultado.vidaRestante)} cliques`}
 							</p>
-							<Progress
-								value={resultado.percentualVidaRestante}
-								className="mt-2"
-							/>
+							{!dados.usarDepreciacaoPorTempo && (
+								<Progress
+									value={resultado.percentualVidaRestante}
+									className="mt-2"
+								/>
+							)}
 						</div>
 
 						<div>

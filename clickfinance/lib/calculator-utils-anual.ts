@@ -63,7 +63,12 @@ export interface ResultadoAnual {
 		cameras: number;
 		lentes: number;
 		outros: number;
-		itens: Array<{ nome: string; tipo: string; valor: number }>;
+		itens: Array<{
+			nome: string;
+			tipo: string;
+			valor: number;
+			criterio: string;
+		}>;
 	};
 	vidaRestante: number;
 	percentualVidaRestante: number;
@@ -84,49 +89,72 @@ export interface ResultadoAnual {
 
 // Lógica de Cálculo Anual
 export function calcularAnual(dados: DadosAnuais): ResultadoAnual {
-	let custoPorClique = 0;
+	const custoPorClique = 0;
 	let depreciacaoTotal = 0;
 	const depreciacaoDetalhada = {
 		cameras: 0,
 		lentes: 0,
 		outros: 0,
-		itens: [] as Array<{ nome: string; tipo: string; valor: number }>,
+		itens: [] as Array<{
+			nome: string;
+			tipo: string;
+			valor: number;
+			criterio: string;
+		}>,
 	};
 
 	// Calcular depreciação
+	const VALOR_RESIDUAL_PADRAO = 0.3;
+
 	dados.equipamentos.forEach((equip) => {
 		let depreciacaoEquip = 0;
+		const valorTotal = equip.valor * equip.quantidade;
+		const valorResidual = valorTotal * VALOR_RESIDUAL_PADRAO;
+		const baseDepreciavel = valorTotal - valorResidual;
 
 		if (equip.tipo === "camera") {
-			if (dados.usarDepreciacaoPorTempo && equip.anosDurabilidade) {
-				depreciacaoEquip =
-					(equip.valor * equip.quantidade) / equip.anosDurabilidade;
-			} else if (equip.vidaUtil && equip.vidaUtil > 0) {
-				const custoPorCliq = equip.valor / equip.vidaUtil;
-				depreciacaoEquip =
-					dados.fotosTotaisMecanicas * custoPorCliq * equip.quantidade;
-				custoPorClique = custoPorCliq;
+			// Base por tempo
+			const anos =
+				equip.anosDurabilidade ??
+				(dados.vidaTotal > 0
+					? dados.vidaTotal / dados.fotosTotaisMecanicas
+					: 3);
+
+			const depreciacaoBase = baseDepreciavel / anos;
+
+			// Ajuste por uso (se mecânico)
+			if (!dados.usarDepreciacaoPorTempo && equip.vidaUtil) {
+				const fatorUso = Math.min(
+					dados.fotosTotaisMecanicas / (equip.vidaUtil * 0.33),
+					1.3,
+				);
+				depreciacaoEquip = depreciacaoBase * fatorUso;
+			} else {
+				depreciacaoEquip = depreciacaoBase;
 			}
 		} else {
 			if (equip.anosDurabilidade && equip.anosDurabilidade > 0) {
-				depreciacaoEquip =
-					(equip.valor * equip.quantidade) / equip.anosDurabilidade;
+				depreciacaoEquip = baseDepreciavel / equip.anosDurabilidade;
 			}
 		}
 
+		// acumula
 		if (equip.tipo === "camera")
 			depreciacaoDetalhada.cameras += depreciacaoEquip;
 		else if (equip.tipo === "lente")
 			depreciacaoDetalhada.lentes += depreciacaoEquip;
 		else depreciacaoDetalhada.outros += depreciacaoEquip;
 
+		depreciacaoTotal += depreciacaoEquip;
 		depreciacaoDetalhada.itens.push({
 			nome: equip.nome,
 			tipo: equip.tipo,
 			valor: depreciacaoEquip,
+			criterio:
+				equip.tipo === "camera"
+					? "Tempo + uso estimado"
+					: "Tempo (valor de mercado)",
 		});
-
-		depreciacaoTotal += depreciacaoEquip;
 	});
 
 	let vidaRestante = 0;
@@ -212,7 +240,9 @@ export function gerarRecomendacoes(
 		recomendacoes.push("💰 Margem baixa. Considere reduzir custos.");
 	if (roi < 30) recomendacoes.push("📊 ROI baixo. Revise sua estratégia.");
 	if (percentualVidaRestante > 0 && percentualVidaRestante < 20)
-		recomendacoes.push("⚠️ Câmera perto do fim da vida útil.");
+		recomendacoes.push(
+			"⚠️ Câmera com alto desgaste. Planeje backup ou troca preventiva.",
+		);
 
 	if (nivel.proximo) {
 		const falta = nivel.proximo - receitaAnual / 12;

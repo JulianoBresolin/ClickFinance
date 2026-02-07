@@ -166,6 +166,42 @@ export function ResultadoEvento({ resultado, dados }: ResultadoEventoProps) {
 							</div>
 						</div>
 					</div>
+
+					{/* Lista Detalhada */}
+					<div className="space-y-2">
+						<p className="text-sm font-medium text-muted-foreground mb-2">
+							Detalhamento por Item:
+						</p>
+						{resultado.depreciacaoDetalhada.itens.map((item, index) => (
+							<div
+								key={index}
+								className="flex justify-between items-center p-2 bg-muted/30 rounded border border-muted"
+							>
+								<div className="flex items-center gap-2">
+									{item.tipo === "camera" && (
+										<Camera className="h-3 w-3 text-blue-600" />
+									)}
+									{item.tipo === "lente" && (
+										<Aperture className="h-3 w-3 text-green-600" />
+									)}
+									{item.tipo === "outro" && (
+										<Box className="h-3 w-3 text-gray-600" />
+									)}
+									<div>
+										<span className="font-medium text-sm block leading-none">
+											{item.nome}
+										</span>
+										<span className="text-[10px] text-muted-foreground">
+											{item.criterio}
+										</span>
+									</div>
+								</div>
+								<span className="text-xs font-semibold">
+									R$ {formatMoeda(item.valor)}
+								</span>
+							</div>
+						))}
+					</div>
 				</CardContent>
 			</Card>
 

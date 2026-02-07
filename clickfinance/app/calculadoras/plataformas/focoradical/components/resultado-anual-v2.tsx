@@ -140,7 +140,7 @@ export function ResultadoAnualV2({ resultado, dados }: ResultadoAnualProps) {
 			{/* Depreciação Detalhada */}
 			<Card>
 				<CardHeader>
-					<CardTitle>📷 Depreciação de Equipamentos</CardTitle>
+					<CardTitle>📷 Depreciação Inteligente de Equipamentos</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -201,7 +201,12 @@ export function ResultadoAnualV2({ resultado, dados }: ResultadoAnualProps) {
 									{item.tipo === "outro" && (
 										<Box className="h-4 w-4 text-gray-600" />
 									)}
-									<span className="font-medium">{item.nome}</span>
+									<div>
+										<span className="font-medium block">{item.nome}</span>
+										<div className="text-xs text-muted-foreground">
+											{item.criterio}
+										</div>
+									</div>
 								</div>
 								<span className="text-sm font-semibold">
 									R$ {formatMoeda(item.valor)}
@@ -292,13 +297,16 @@ export function ResultadoAnualV2({ resultado, dados }: ResultadoAnualProps) {
 							<div className="text-sm text-muted-foreground mb-1">
 								Depreciação Total
 							</div>
+
 							<div className="text-xl font-semibold">
 								R$ {formatMoeda(resultado.depreciacaoTotal)}
 							</div>
+
 							<p className="text-xs text-muted-foreground">
-								{dados.usarDepreciacaoPorTempo
-									? "Baseado em tempo de uso"
-									: "Baseado em cliques"}
+								Modelo híbrido (tempo + valor de mercado + uso)
+							</p>
+							<p className="text-xs text-muted-foreground mt-1">
+								Considera valor de revenda médio estimado (30%)
 							</p>
 						</div>
 
@@ -319,13 +327,13 @@ export function ResultadoAnualV2({ resultado, dados }: ResultadoAnualProps) {
 							resultado.percentualVidaRestante > 0 && (
 								<div>
 									<div className="text-sm text-muted-foreground mb-1">
-										Vida Útil Restante
+										Saúde do Equipamento
 									</div>
 									<div className="text-xl font-semibold">
 										{formatPorcentagem(resultado.percentualVidaRestante, 1)}%
 									</div>
 									<p className="text-xs text-muted-foreground">
-										{formatNumero(resultado.vidaRestante)} cliques
+										Indicador de risco operacional (não impede uso)
 									</p>
 									<Progress
 										value={resultado.percentualVidaRestante}

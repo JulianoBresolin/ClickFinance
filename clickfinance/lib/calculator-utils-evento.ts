@@ -47,7 +47,12 @@ export interface ResultadoEvento {
 		cameras: number;
 		lentes: number;
 		outros: number;
-		itens: Array<{ nome: string; tipo: string; valor: number }>;
+		itens: Array<{
+			nome: string;
+			tipo: string;
+			valor: number;
+			criterio: string;
+		}>;
 	};
 
 	custoTotal: number;
@@ -67,34 +72,61 @@ export function calcularEvento(dados: DadosEvento): ResultadoEvento {
 		cameras: 0,
 		lentes: 0,
 		outros: 0,
-		itens: [] as Array<{ nome: string; tipo: string; valor: number }>,
+		itens: [] as Array<{
+			nome: string;
+			tipo: string;
+			valor: number;
+			criterio: string;
+		}>,
 	};
+
+	const VALOR_RESIDUAL_PADRAO = 0.3;
 
 	// 1. Calcular Depreciação
 	dados.equipamentos.forEach((equip) => {
 		let depreciacaoEquip = 0;
+		let criterio = "";
+
+		const valorTotal = equip.valor * equip.quantidade;
+		const valorResidual = valorTotal * VALOR_RESIDUAL_PADRAO;
+		const baseDepreciavel = valorTotal - valorResidual;
 
 		if (equip.tipo === "camera") {
-			if (dados.usarDepreciacaoPorTempo && equip.anosDurabilidade) {
-				const depAnual =
-					(equip.valor * equip.quantidade) / equip.anosDurabilidade;
-				const depDiaria = depAnual / 365;
-				depreciacaoEquip = depDiaria * dados.diasEvento;
-			} else if (equip.vidaUtil && equip.vidaUtil > 0) {
-				const custoPorClique = equip.valor / equip.vidaUtil;
+			// Base por tempo (Anual)
+			const anos = equip.anosDurabilidade ?? 3;
+			const depreciacaoAnualBase = baseDepreciavel / anos;
+			const depreciacaoDiaria = depreciacaoAnualBase / 365;
+
+			if (
+				!dados.usarDepreciacaoPorTempo &&
+				equip.vidaUtil &&
+				equip.vidaUtil > 0
+			) {
+				// Modelo Híbrido/Uso (Aproximação do Anual: Base / VidaUtil)
+				// Custo por clique baseado no valor depreciável unitário (70% do valor)
+				const baseUnit = baseDepreciavel / equip.quantidade;
+				const custoPorClique = baseUnit / equip.vidaUtil;
 				const fotosParaDepreciacao =
 					dados.fotosFeitasMecanicas > 0
 						? dados.fotosFeitasMecanicas
 						: dados.fotosFeitas;
-				depreciacaoEquip =
-					fotosParaDepreciacao * custoPorClique * equip.quantidade;
+
+				depreciacaoEquip = fotosParaDepreciacao * custoPorClique;
+				criterio = "Uso Estimado (Obturador)";
+			} else {
+				// Tempo
+				depreciacaoEquip = depreciacaoDiaria * dados.diasEvento;
+				criterio = "Tempo (Valor de Mercado)";
 			}
 		} else {
+			// Lentes / Outros
+			criterio = "Tempo (Valor de Mercado)";
 			if (equip.anosDurabilidade && equip.anosDurabilidade > 0) {
-				const depAnual =
-					(equip.valor * equip.quantidade) / equip.anosDurabilidade;
+				const depAnual = baseDepreciavel / equip.anosDurabilidade;
 				const depDiaria = depAnual / 365;
 				depreciacaoEquip = depDiaria * dados.diasEvento;
+			} else {
+				depreciacaoEquip = 0;
 			}
 		}
 
@@ -108,6 +140,7 @@ export function calcularEvento(dados: DadosEvento): ResultadoEvento {
 			nome: equip.nome,
 			tipo: equip.tipo,
 			valor: depreciacaoEquip,
+			criterio,
 		});
 
 		depreciacaoTotal += depreciacaoEquip;

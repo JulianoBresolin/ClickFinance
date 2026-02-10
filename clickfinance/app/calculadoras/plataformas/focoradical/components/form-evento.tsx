@@ -15,7 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Info, Calculator } from "lucide-react";
-import { EquipamentosManager } from "./equipamentos-manager";
+import { EquipamentosManager } from "../../../../../components/equipamentos/equipamentos-manager";
 import {
 	type DadosEvento,
 	type EquipamentoDepreciacao,

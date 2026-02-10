@@ -1,13 +1,14 @@
+import { type EquipamentoDepreciacao } from "./calculator-utils-anual";
+
 // Tipos para Precificação
 export interface DadosPrecificacao {
 	// Custos Fixos (Mensal)
 	custosFixosMensais: number; // Softwares, armazenamento, etc.
 	eventosPorMes: number; // Média de eventos para diluir o custo
 
-	// Custos do Equipamento
-	valorEquipamento: number; // Valor total do seu equipamento (câmera, lentes)
-	vidaUtilEquipamentoCliques: number; // Vida útil em cliques do obturador
-	tempoDepreciacaoAnos: number; // Tempo de depreciação em anos
+	// Equipamentos
+	equipamentos: EquipamentoDepreciacao[];
+	usarDepreciacaoPorTempo: boolean;
 
 	// Custos do Evento
 	custoOperacional: number; // Custo operacional por evento (transporte, etc)
@@ -63,23 +64,46 @@ export function calcularPrecificacao(
 			? dados.custosFixosMensais / dados.eventosPorMes
 			: 0;
 
-	// Depreciação por clique
-	const custoPorClique =
-		dados.vidaUtilEquipamentoCliques > 0
-			? dados.valorEquipamento / dados.vidaUtilEquipamentoCliques
-			: 0;
-	const depreciacaoCliques = custoPorClique * dados.fotosEstimadasEvento;
+	// Calcular Depreciação Total (Baseado na lista de equipamentos)
+	let depreciacaoTotal = 0;
+	const VALOR_RESIDUAL_PADRAO = 0.3; // 30% de valor residual
 
-	// Depreciação por tempo (Mensal)
-	const depreciacaoMensal =
-		dados.tempoDepreciacaoAnos > 0
-			? dados.valorEquipamento / (dados.tempoDepreciacaoAnos * 12)
-			: 0;
+	dados.equipamentos.forEach((equip) => {
+		const valorTotal = equip.valor * equip.quantidade;
+		const valorResidual = valorTotal * VALOR_RESIDUAL_PADRAO;
+		const baseDepreciavel = valorTotal - valorResidual;
+		let depreciacaoEquip = 0;
 
-	const depreciacaoTempoPorEvento =
-		dados.eventosPorMes > 0 ? depreciacaoMensal / dados.eventosPorMes : 0;
-
-	const depreciacaoTotal = depreciacaoCliques + depreciacaoTempoPorEvento;
+		if (equip.tipo === "camera") {
+			if (
+				!dados.usarDepreciacaoPorTempo &&
+				equip.vidaUtil &&
+				equip.vidaUtil > 0
+			) {
+				// Híbrido/Uso (Shutter count)
+				// Custo por clique unitário (baseDepreciavel considera quantidade, então dividimos para ter o unitário)
+				const baseUnit = baseDepreciavel / equip.quantidade;
+				const custoPorClique = baseUnit / equip.vidaUtil;
+				// Assumimos que o total de fotos estimadas consome o obturador
+				depreciacaoEquip = dados.fotosEstimadasEvento * custoPorClique;
+			} else {
+				// Tempo (rateado por eventos no mês)
+				const anos = equip.anosDurabilidade || 3;
+				const depAnual = baseDepreciavel / anos;
+				const depMensal = depAnual / 12;
+				depreciacaoEquip =
+					dados.eventosPorMes > 0 ? depMensal / dados.eventosPorMes : 0;
+			}
+		} else {
+			// Lentes / Outros (Sempre por tempo)
+			const anos = equip.anosDurabilidade || (equip.tipo === "lente" ? 10 : 5);
+			const depAnual = baseDepreciavel / anos;
+			const depMensal = depAnual / 12;
+			depreciacaoEquip =
+				dados.eventosPorMes > 0 ? depMensal / dados.eventosPorMes : 0;
+		}
+		depreciacaoTotal += depreciacaoEquip;
+	});
 
 	// Custo total do evento
 	const custoTotalEvento =

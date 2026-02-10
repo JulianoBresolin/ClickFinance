@@ -210,7 +210,7 @@ export function ResultadoPrecificacao({
 								{resultado.cenarios.map((cenario, index) => {
 									const isRecommended =
 										Math.abs(cenario.preco - resultado.precoSugeridoComMargem) <
-										0.5;
+										0.01;
 									return (
 										<tr
 											key={index}

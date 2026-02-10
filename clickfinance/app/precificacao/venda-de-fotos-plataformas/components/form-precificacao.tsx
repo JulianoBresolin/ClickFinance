@@ -11,6 +11,8 @@ import { Info, Calculator } from "lucide-react";
 import { type DadosPrecificacao } from "@/lib/pricing-utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchPopup } from "@/components/layout/search-popup";
+import { EquipamentosManager } from "@/components/equipamentos/equipamentos-manager";
+import { type EquipamentoDepreciacao } from "@/lib/calculator-utils-anual";
 interface FormPrecificacaoProps {
 	onCalculate: (dados: DadosPrecificacao) => void;
 }
@@ -18,10 +20,12 @@ interface FormPrecificacaoProps {
 export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 	const [custosFixosMensais, setCustosFixosMensais] = useState("");
 	const [eventosPorMes, setEventosPorMes] = useState("");
-	const [valorEquipamento, setValorEquipamento] = useState("");
-	const [vidaUtilEquipamentoCliques, setVidaUtilEquipamentoCliques] =
-		useState("");
-	const [tempoDepreciacaoAnos, setTempoDepreciacaoAnos] = useState("");
+
+	const [equipamentos, setEquipamentos] = useState<EquipamentoDepreciacao[]>(
+		[],
+	);
+	const [usarDepreciacaoPorTempo, setUsarDepreciacaoPorTempo] = useState(false);
+
 	const [custoOperacional, setCustoOperacional] = useState("");
 	const [fotosEstimadasEvento, setFotosEstimadasEvento] = useState("");
 	const [taxaPlataforma, setTaxaPlataforma] = useState(10);
@@ -40,9 +44,8 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 		const dados: DadosPrecificacao = {
 			custosFixosMensais: parseCurrency(custosFixosMensais),
 			eventosPorMes: parseCurrency(eventosPorMes),
-			valorEquipamento: parseCurrency(valorEquipamento),
-			vidaUtilEquipamentoCliques: parseCurrency(vidaUtilEquipamentoCliques),
-			tempoDepreciacaoAnos: parseCurrency(tempoDepreciacaoAnos),
+			equipamentos: equipamentos,
+			usarDepreciacaoPorTempo: usarDepreciacaoPorTempo,
 			custoOperacional: parseCurrency(custoOperacional),
 
 			fotosEstimadasEvento: parseCurrency(fotosEstimadasEvento),
@@ -111,51 +114,31 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="valorEquipamento">
-								Valor do equipamento (R$)
-							</Label>
-							<CurrencyInput
-								id="valorEquipamento"
-								placeholder="Ex: 15.000,00"
-								value={valorEquipamento}
-								onValueChange={setValorEquipamento}
-							/>
-							<p className="text-sm text-muted-foreground">
-								Câmera, lentes, flash, etc.
-							</p>
+					{/* Gerenciador de Equipamentos */}
+					<div className="space-y-4 pt-2">
+						<div className="flex items-center justify-between">
+							<Label className="text-base font-medium">Equipamentos</Label>
+							<div className="flex items-center gap-2">
+								<input
+									type="checkbox"
+									id="usarDepreciacaoPorTempo"
+									checked={usarDepreciacaoPorTempo}
+									onChange={(e) => setUsarDepreciacaoPorTempo(e.target.checked)}
+									className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+								/>
+								<Label
+									htmlFor="usarDepreciacaoPorTempo"
+									className="text-sm font-normal cursor-pointer"
+								>
+									Forçar depreciação por tempo (Câmeras)
+								</Label>
+							</div>
 						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="vidaUtilEquipamentoCliques">
-								Vida útil do obturador
-							</Label>
-							<NumberInput
-								id="vidaUtilEquipamentoCliques"
-								placeholder="Ex: 200.000"
-								value={vidaUtilEquipamentoCliques}
-								onValueChange={setVidaUtilEquipamentoCliques}
-							/>
-							<p className="text-sm text-muted-foreground">
-								Em cliques (obturador mecânico).
-							</p>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="tempoDepreciacaoAnos">
-								Tempo de troca (anos)
-							</Label>
-							<NumberInput
-								id="tempoDepreciacaoAnos"
-								placeholder="Ex: 3"
-								value={tempoDepreciacaoAnos}
-								onValueChange={setTempoDepreciacaoAnos}
-							/>
-							<p className="text-sm text-muted-foreground">
-								Em quantos anos pretende trocar o equipamento.
-							</p>
-						</div>
+						<EquipamentosManager
+							equipamentos={equipamentos}
+							onChange={setEquipamentos}
+							usarDepreciacaoPorTempo={usarDepreciacaoPorTempo}
+						/>
 					</div>
 				</div>
 

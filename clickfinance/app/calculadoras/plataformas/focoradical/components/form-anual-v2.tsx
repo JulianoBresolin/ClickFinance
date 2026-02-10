@@ -11,7 +11,7 @@ import {
 	type DadosAnuais,
 	type EquipamentoDepreciacao,
 } from "@/lib/calculator-utils-anual";
-import { EquipamentosManager } from "./equipamentos-manager";
+import { EquipamentosManager } from "../../../../../components/equipamentos/equipamentos-manager";
 import { SearchPopup } from "@/components/layout/search-popup";
 
 interface FormAnualProps {

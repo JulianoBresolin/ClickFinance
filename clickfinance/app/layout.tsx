@@ -22,6 +22,9 @@ export const metadata: Metadata = {
 	icons: {
 		icon: "/favicon.ico",
 	},
+	verification: {
+		google: "Iqyg4JwyPmFqdG3rQUBSisq-92xy-SG2xvbmGaEwYmU",
+	},
 	keywords: [
 		"fotografia",
 		"gestão financeira",

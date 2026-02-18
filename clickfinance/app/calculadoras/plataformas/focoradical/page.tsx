@@ -69,7 +69,7 @@ export default function CalculadoraPage() {
 
 					{/* Tabs */}
 					<Tabs defaultValue="anual" className="space-y-6">
-						<TabsList className="grid w-full grid-cols-2 bg-white/90 backdrop-blur">
+						<TabsList className="grid w-full grid-cols-2 bg-[#f0cdc1] backdrop-blur">
 							<TabsTrigger value="anual" className="text-base">
 								📊 Análise Anual
 							</TabsTrigger>

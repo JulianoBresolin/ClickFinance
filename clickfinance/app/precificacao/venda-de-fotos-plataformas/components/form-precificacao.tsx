@@ -116,8 +116,10 @@ export function FormPrecificacao({ onCalculate }: FormPrecificacaoProps) {
 
 					{/* Gerenciador de Equipamentos */}
 					<div className="space-y-4 pt-2">
-						<div className="flex items-center justify-between">
-							<Label className="text-base font-medium">Equipamentos</Label>
+						<div className="flex flex-wrap items-center justify-between">
+							<Label className="text-base font-medium pb-0.5">
+								Equipamentos
+							</Label>
 							<div className="flex items-center gap-2">
 								<input
 									type="checkbox"

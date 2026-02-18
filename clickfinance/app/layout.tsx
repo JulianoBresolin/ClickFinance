@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import Header from "@/components/layout/header";
 import { SearchPopup } from "@/components/layout/search-popup";
 import BannerInfo from "@/components/layout/banner-info";
+import Footer from "@/components/layout/footer";
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -79,6 +80,7 @@ export default function RootLayout({
 				<SearchPopup />
 				<Toaster richColors position="top-right" />
 				<BannerInfo />
+				<Footer />
 			</body>
 		</html>
 	);

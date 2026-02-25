@@ -20,6 +20,7 @@ import {
 	type DadosEvento,
 	type EquipamentoDepreciacao,
 	formatMoeda,
+	calcularEvento,
 } from "@/lib/calculator-utils-evento";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -55,28 +56,22 @@ export function FormEvento({ onCalculate }: FormEventoProps) {
 
 	// Cálculo de depreciação em tempo real para feedback visual
 	const depreciacaoEstimada = useMemo(() => {
-		let total = 0;
-		const dias = Number(formData.diasEvento) || 1;
-		const fotosMec =
-			Number(formData.fotosFeitasMecanicas) ||
-			Number(formData.fotosFeitas) ||
-			0;
+		const dadosEstimados: DadosEvento = {
+			equipamentos,
+			usarDepreciacaoPorTempo,
+			diasEvento: Number(formData.diasEvento) || 1,
+			nome: "",
+			tipo: "plataforma",
+			porcentagemComissao: 0,
+			fotosFeitas: Number(formData.fotosFeitas) || 0,
+			fotosFeitasMecanicas: Number(formData.fotosFeitasMecanicas) || 0,
+			fotosVendidas: 0,
+			receitaLiquidaTotal: 0,
+			custosOperacionais: 0,
+		};
 
-		equipamentos.forEach((equip) => {
-			if (usarDepreciacaoPorTempo) {
-				if (equip.anosDurabilidade && equip.anosDurabilidade > 0) {
-					total +=
-						((equip.valor * equip.quantidade) /
-							(equip.anosDurabilidade * 365)) *
-						dias;
-				}
-			} else {
-				if (equip.tipo === "camera" && equip.vidaUtil && equip.vidaUtil > 0) {
-					total += fotosMec * (equip.valor / equip.vidaUtil) * equip.quantidade;
-				}
-			}
-		});
-		return formatMoeda(total);
+		const resultado = calcularEvento(dadosEstimados);
+		return formatMoeda(resultado.depreciacaoTotal);
 	}, [
 		equipamentos,
 		usarDepreciacaoPorTempo,

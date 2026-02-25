@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { NumberInput } from "@/components/ui/number-input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Mantendo conforme input
 import { Info } from "lucide-react";
 import {
 	type DadosAnuais,
@@ -34,6 +34,7 @@ export function FormAnualV2({ onCalculate }: FormAnualProps) {
 		custoEvento: "",
 	});
 	const [showPopup, setShowPopup] = useState(false);
+
 	const parseCurrency = (value: string): number => {
 		if (!value) return 0;
 		return Number(value.replace(/\./g, "").replace(",", "."));

@@ -7,7 +7,7 @@ import {
 	type ResultadoPrecificacao,
 	gerarInsightsPrecificacao,
 } from "@/lib/pricing-utils";
-import { formatMoeda, formatPorcentagem } from "@/lib/calculator-utils";
+import { formatMoeda, formatPorcentagem } from "@/lib/calculator-utils-anual";
 import { TrendingUp, Target, DollarSign, AlertTriangle } from "lucide-react";
 
 interface ResultadoPrecificacaoProps {

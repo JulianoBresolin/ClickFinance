@@ -8,12 +8,10 @@ import {
 	type ResultadoAnual,
 	type DadosAnuais,
 	gerarRecomendacoes,
-} from "@/lib/calculator-utils-anual";
-import {
 	formatMoeda,
 	formatNumero,
 	formatPorcentagem,
-} from "@/lib/calculator-utils";
+} from "@/lib/calculator-utils-anual";
 import { Camera, Aperture, Box } from "lucide-react";
 
 interface ResultadoAnualProps {
